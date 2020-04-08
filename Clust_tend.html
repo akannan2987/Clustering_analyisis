@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Abhilash Kannan" />
+
+
+<title>Accessing Clustering Tendency</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Clustering analyis for Candida albicans</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Clust_tend.html">Clustering tendency</a>
+    </li>
+    <li>
+      <a href="optimal_clust_identification.html">Optimal number of clusters</a>
+    </li>
+    <li>
+      <a href="valid_stats.html">Validation Statistics</a>
+    </li>
+    <li>
+      <a href="Clustering_p_value.html">P-value for Heirarchial Clustering</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:abhilifesicizurich@gmail.com">
+    <span class="fa fa-question fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Accessing Clustering Tendency</h1>
+<h4 class="author">Abhilash Kannan</h4>
+<h4 class="date">25/2/2020</h4>
+
+</div>
+
+
+<style type="text/css">
+
+body{ /* Normal  */
+  
+      
+  }
+td {  /* Table  */
+  
+}
+h1.title {
+  
+  color: DarkRed;
+}
+h1 { /* Header 1 */
+  
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+h4 { /* Header 4 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+h5 { /* Header 4 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+
+code.r{ /* Code block */
+    
+}
+pre { /* Code block - determines code spacing between lines */
+    
+}
+</style>
+<div id="assessing-clustering-tendency" class="section level1">
+<h1>Assessing Clustering Tendency</h1>
+<p>Before applying any clustering method on the data, it is important to evaluate whether the data sets contains meaningful clusters (i.e: non-random structures) or not. If yes, then how many clusters are there. This process is defined as the assessing of <strong>clustering tendency</strong> or the feasibility of the clustering analysis.</p>
+<p>A big issue, in cluster analysis, is that clustering methods will return clusters even if the data does not contain any clusters. In other words, if you blindly apply a clustering method on a data set, it will divide the data into clusters because that is what it supposed to do.</p>
+<p>In this section, we start by describing why we should evaluate the clustering tendency before applying any clustering method on a data. Next, we provide statistical and visual methods for assessing the clustering tendency.</p>
+<div id="r-packages-required-for-this-work" class="section level2">
+<h2>R packages required for this work</h2>
+<ul>
+<li><em>factoextra</em> for data visualization</li>
+<li><em>clustertend</em> for statistical assessment clustering tendency</li>
+</ul>
+<p>To install the two packages, type this:</p>
+<pre class="r"><code>#install.packages(c(&quot;factoextra&quot;, &quot;clustertend&quot;)) #can skip t his step if the these packages have already been installed.</code></pre>
+</div>
+<div id="data-preparation" class="section level2">
+<h2>1) Data preparation</h2>
+<p>We’ll use two data sets:</p>
+<ul>
+<li><p><strong>Gene expression data - df1</strong> (log2FC of isolates vs SC5314 - 182 samples X 6217 genes from Monocultre and Coculture).</p></li>
+<li><p><strong>Gene expression data - df2</strong> (log2FC of isolates in Monoculture vs Coculture).</p></li>
+</ul>
+<pre class="r"><code>set.seed(123)
+
+#df1
+logFC_isolatesvsSC5314 &lt;- read.delim(&quot;/Users/Abhi/Desktop/Abhilash/study/Post-Doc/Lab_notebook/eQTL/Gene_expression_analysis/IsolatesvsSC5314/isolatesvsSC5314_LogFC_transpose.txt&quot;,
+                          row.names=&quot;isolate&quot;,stringsAsFactors = FALSE)
+
+#df2
+logFC_Monovscoculture &lt;- read.delim(&quot;/Users/Abhi/Desktop/Abhilash/study/Post-Doc/Lab_notebook/eQTL/Gene_expression_analysis/Isolates_conditions/Mono_coculture_isolates_LogFC_transpose.txt&quot;,
+                          row.names=&quot;isolate_comp&quot;,stringsAsFactors = FALSE)</code></pre>
+<p>The data sets look like this:</p>
+<pre class="r"><code>#df1
+head(logFC_isolatesvsSC5314, 3)
+
+#df2
+head(logFC_Monovscoculture, 3)</code></pre>
+<p>Check if there is any missing values, if found try to remove it.</p>
+<pre class="r"><code>#df1
+df1 &lt;- logFC_isolatesvsSC5314[,c(9:6225)]
+df1 &lt;- na.omit(df1)
+#df2
+df2 &lt;- logFC_Monovscoculture[,c(7:6223)]
+df2 &lt;- na.omit(df2)</code></pre>
+<p>we also don’t want the clustering algorithm to depend to an arbitrary variable unit, we start by scaling/standardizing the data using the R function scale():</p>
+<pre class="r"><code>#df1
+df1_scaled &lt;- scale(df1)
+
+#df2
+df2_scaled &lt;- scale(df2)</code></pre>
+<p><strong>Defining Groups df1 and df2 dataset</strong>:</p>
+<p>This is required for the cluster validation</p>
+<pre class="r"><code># df1
+
+#Groups for df1 based on SNP clades
+group_df1_SNP &lt;- factor(logFC_isolatesvsSC5314$CLADE_SNP_numeric, levels = unique(logFC_isolatesvsSC5314$CLADE_SNP_numeric))
+group_df1_SNP
+
+#Groups for df1 based on MLST clades
+group_df1_MLST &lt;- factor(logFC_isolatesvsSC5314$CLADE_MLST_numeric, levels = unique(logFC_isolatesvsSC5314$CLADE_MLST_numeric))
+group_df1_MLST
+
+#Groups for df1 based on site of infection
+group_df1_site &lt;- factor(logFC_isolatesvsSC5314$Site_numeric, levels = unique(logFC_isolatesvsSC5314$Site_numeric))
+group_df1_site
+
+#Groups for df1 based on culture type
+group_df1_culture &lt;- factor(logFC_isolatesvsSC5314$culture_type_numeric, levels = unique(logFC_isolatesvsSC5314$culture_type_numeric))
+group_df1_culture
+
+#df2
+
+#Groups for df2 based on SNP clades
+group_df2_SNP &lt;- factor(logFC_Monovscoculture$CLADE_SNP_numeric, levels = unique(logFC_Monovscoculture$CLADE_SNP_numeric))
+group_df2_SNP
+
+#Groups for df2 based on MLST clades
+group_df2_MLST &lt;- factor(logFC_Monovscoculture$CLADE_MLST_numeric, levels = unique(logFC_Monovscoculture$CLADE_MLST_numeric))
+group_df2_MLST
+
+#Groups for df2 based on site of infection
+group_df2_site &lt;- factor(logFC_Monovscoculture$Site_Numeric, levels = unique(logFC_Monovscoculture$Site_Numeric))
+group_df2_site</code></pre>
+</div>
+<div id="visual-inspection-of-the-data" class="section level2">
+<h2>2) Visual inspection of the data</h2>
+<p>We start by visualizing the data to assess whether they contains any meaningful clusters. As the data contain more than two variables, we need to reduce the dimensionality in order to plot a scatter plot. This can be done using <em>principal component analysis (PCA)</em> algorithm (<em>R function: prcomp()</em>). After performing PCA, we use the function <em>fviz_pca_ind()</em> [<em>factoextra R package</em>] to visualize the output. We can intially visualize the data using 2D PCA plots</p>
+<p>The <strong>df1</strong> and <strong>df2</strong> data sets can be illustrated as follows:</p>
+<div id="constucting-2d-pca-plots-for-the-data-sets" class="section level3">
+<h3>2.1) Constucting 2D PCA plots for the data sets:</h3>
+<p><strong><em>for df1:</em></strong></p>
+<p><strong>a) Based on Culture type: <em>Monoculture</em> and <em>Coculture</em></strong></p>
+<pre class="r"><code>library(&quot;factoextra&quot;)
+
+#df1
+# Plot df1 data set based on Culture type
+fviz_pca_ind(prcomp(df1_scaled), title = &quot;PCA - log2FC of isolates vs SC5314 (Culture type)&quot;, 
+             habillage = logFC_isolatesvsSC5314$culture_type_numeric,  palette = &quot;jco&quot;,
+             geom = &quot;point&quot;, ggtheme = theme_classic(), addEllipses = TRUE,
+             col.ind = &quot;black&quot;, fill.ind = &quot;white&quot;, col.ind.sup = &quot;blue&quot;, alpha.ind = 1,
+             legend = &quot;bottom&quot;)</code></pre>
+<p><img src="Clust_tend_files/figure-html/2D-PCA%20-%20df1%20data%20set%20based%20on%20Culture%20type-1.png" width="672" /></p>
+<p><strong>b) Based on SNP based clades: <em>17 clades</em> and <em>1 Non-catergorized</em></strong></p>
+<pre class="r"><code>#df1
+# Plot df1 data set based on SNP differences
+fviz_pca_ind(prcomp(df1_scaled), title = &quot;PCA - log2FC of isolates vs SC5314 (SNP_CLADES)&quot;, 
+             habillage = logFC_isolatesvsSC5314$CLADE_SNP_numeric,  palette = &quot;jco&quot;,
+             geom = &quot;point&quot;, ggtheme = theme_classic(), addEllipses = TRUE,
+             col.ind = &quot;black&quot;, fill.ind = &quot;white&quot;, col.ind.sup = &quot;blue&quot;, alpha.ind = 1,
+             legend = &quot;bottom&quot;)</code></pre>
+<p><img src="Clust_tend_files/figure-html/2D-PCA-df1%20data%20set%20based%20on%20SNP%20clades-1.png" width="672" /></p>
+<p><strong>c) Based on MLST based clades: <em>14 clades</em> and <em>Non-categorized</em></strong></p>
+<pre class="r"><code>#df1
+# Plot df1 data set based on MLST differences
+fviz_pca_ind(prcomp(df1_scaled), title = &quot;PCA - log2FC of isolates vs SC5314 (MLST clades)&quot;, 
+             habillage = logFC_isolatesvsSC5314$CLADE_MLST,  palette = &quot;jco&quot;,
+             geom = &quot;point&quot;, ggtheme = theme_classic(),addEllipses = TRUE,
+             col.ind = &quot;black&quot;, fill.ind = &quot;white&quot;, col.ind.sup = &quot;blue&quot;, alpha.ind = 1,
+             legend = &quot;bottom&quot;)</code></pre>
+<p><img src="Clust_tend_files/figure-html/2D-PCA-df1%20data%20set%20based%20on%20MLST%20clades-1.png" width="672" /></p>
+<p><strong>d) Based on categories or type of infection: <em>commensal, food spoilage, invasive, starling, superficial</em> and <em>unknown</em></strong></p>
+<pre class="r"><code>#df1
+# Plot df1 data set bsed on categories or type of infection
+fviz_pca_ind(prcomp(df1_scaled), title = &quot;PCA - log2FC of isolates vs SC5314 (Sites)&quot;, 
+             habillage = logFC_isolatesvsSC5314$Site_numeric,  palette = &quot;jco&quot;,
+             geom = &quot;point&quot;, ggtheme = theme_classic(),addEllipses = TRUE,
+             col.ind = &quot;black&quot;, fill.ind = &quot;white&quot;, col.ind.sup = &quot;blue&quot;, alpha.ind = 1,
+             legend = &quot;bottom&quot;)</code></pre>
+<p><img src="Clust_tend_files/figure-html/2D-PCA-df1%20data%20set%20based%20on%20categories-1.png" width="672" /></p>
+<p>For the data set <strong><em>df2</em></strong>:</p>
+<p><strong>a) Based on SNP based clades: <em>17 clades</em> and <em>1 Non-catergorized</em></strong></p>
+<pre class="r"><code>#df2
+# Plot df2 data set based on SNP differences
+fviz_pca_ind(prcomp(df2_scaled), title = &quot;PCA - log2FC of isolates in Monoculture vs Coculture&quot;,habillage = logFC_Monovscoculture$CLADE_SNP_numeric, 
+             palette = &quot;jco&quot;,addEllipses = TRUE,
+             geom = c(&quot;point&quot;), ggtheme = theme_classic(), scale=TRUE,
+             col.ind = &quot;black&quot;, fill.ind = &quot;white&quot;, col.ind.sup = &quot;blue&quot;, alpha.ind = 1,
+             legend = &quot;bottom&quot;)</code></pre>
+<p><img src="Clust_tend_files/figure-html/2D-PCA-df2%20data%20set%20based%20on%20SNP%20clades-1.png" width="672" /></p>
+<p><strong>b) Based on MLST based clades: <em>14 clades</em> and <em>Non-categorized</em></strong></p>
+<pre class="r"><code>#df2
+# Plot df2 data set based on MLST differences
+
+fviz_pca_ind(prcomp(df2_scaled), title = &quot;PCA - log2FC of isolates in Monoculture vs Coculture&quot;,habillage = logFC_Monovscoculture$CLADE_MLST_numeric, 
+             palette = &quot;jco&quot;,addEllipses = TRUE,
+             geom = c(&quot;point&quot;), ggtheme = theme_classic(), scale=TRUE,
+             col.ind = &quot;black&quot;, fill.ind = &quot;white&quot;, col.ind.sup = &quot;blue&quot;, alpha.ind = 1,
+             legend = &quot;bottom&quot;)</code></pre>
+<p><img src="Clust_tend_files/figure-html/2D-PCA-df2%20data%20set%20based%20on%20MLST%20clades-1.png" width="672" /></p>
+<p><strong>c) Based on categories or type of infection: <em>commensal, food spoilage, invasive, starling, superficial</em> and <em>unknown</em></strong></p>
+<pre class="r"><code>#df2
+# Plot df2 data set bsed on categories or type of infection
+fviz_pca_ind(prcomp(df2_scaled), title = &quot;PCA - log2FC of isolates in Monoculture vs Coculture&quot;,habillage = logFC_Monovscoculture$Site_Numeric, 
+             palette = &quot;jco&quot;,addEllipses = TRUE,
+             geom = c(&quot;point&quot;), ggtheme = theme_classic(), scale=TRUE,
+             col.ind = &quot;black&quot;, fill.ind = &quot;white&quot;, col.ind.sup = &quot;blue&quot;, alpha.ind = 1,
+             legend = &quot;bottom&quot;)</code></pre>
+<p><img src="Clust_tend_files/figure-html/2D-PCA-df2%20data%20set%20based%20on%20categories-1.png" width="672" /></p>
+<p>Based on the 2D PCA plots it can be seen that the <strong><em>df1</em></strong> and <strong><em>df2</em></strong> data seems to contain no real clusters. However we cannot be sure. hence we contruct the 3D PCA plots to see if we can indetify any meaningful clusters.</p>
+</div>
+<div id="constucting-3d-pca-plots-for-the-data-sets" class="section level3">
+<h3>2.1) Constucting 3D PCA plots for the data sets:</h3>
+<p><strong><em>for df1</em></strong>:</p>
+<p><strong>a) Based on Culture type: <em>Monoculture</em> and <em>Coculture</em></strong></p>
+<pre class="r"><code>library(&quot;rgl&quot;)
+
+#obtaining the PC scores
+pca.data_df1_scaled &lt;- prcomp(df1_scaled)
+scores_df1_scaled = as.data.frame(pca.data_df1_scaled$x) 
+#summary(pca.data_df1_scaled)
+
+#Plotting 3D PCA plot for df1 by the SNP clade difference
+
+plot3d(scores_df1_scaled[,1:3], col=c(1:2), size=4, type=&#39;p&#39;,pch=16 ,main=&quot;PCA-3D&quot;, forceClipregion = FALSE
+       )
+text3d(scores_df1_scaled[,1]+2, scores_df1_scaled[,2]+10, scores_df1_scaled[,3]+2,
+       texts=c(as.character(logFC_isolatesvsSC5314$culture_type)), cex= 0.4, pos=3)</code></pre>
+<p><strong>b) Based on SNP based clades: <em>17 clades</em> and <em>1 Non-catergorized</em></strong></p>
+<pre class="r"><code>#df1
+#Plotting 3D PCA plot by the SNP clade difference
+plot3d(scores_df1_scaled[,1:3], col=as.integer(logFC_isolatesvsSC5314$CLADE_SNP), size=4, type=&#39;p&#39;,pch=16 ,main=&quot;PCA-3D&quot;, forceClipregion = FALSE
+       )
+text3d(scores_df1_scaled[,1]+2, scores_df1_scaled[,2]+10, scores_df1_scaled[,3]+2,
+       texts=c(as.character(logFC_isolatesvsSC5314$CLADE_SNP)), cex= 1, pos=3)</code></pre>
+<div class="figure">
+<img src="3D_PCA_df1_SNP.png" alt="3D PCA plot of df1 by the SNP clade difference" />
+<p class="caption"><strong>3D PCA plot of df1 by the SNP clade difference</strong></p>
+</div>
+<p>Based on the 3D PCA plots for SNP clades it can be seen that for the <strong><em>df1</em></strong> data set, <strong>Clade 13</strong> seems to cluster together. We will validate this in the next section</p>
+<p><strong>c) Based on MLST based clades: <em>14 clades</em> and <em>Non-categorized</em></strong></p>
+<pre class="r"><code>#df1
+#Plotting 3D PCA plot by the MLST clade difference
+
+plot3d(scores_df1_scaled[,1:3], col=as.integer(logFC_isolatesvsSC5314$CLADE_MLST), size=4, type=&#39;p&#39;,pch=16 ,main=&quot;PCA-3D&quot;, forceClipregion = FALSE
+       )
+text3d(scores_df1_scaled[,1]+2, scores_df1_scaled[,2]+10, scores_df1_scaled[,3]+2,
+       texts=c(as.character(logFC_isolatesvsSC5314$CLADE_MLST)), cex= 1, pos=3)</code></pre>
+<p>Based on the 3D PCA plots for MLST clades it can be seen that for the <strong><em>df1</em></strong> data set, <strong>C.africana</strong> seems to cluster together. We will validate this in the next section</p>
+<div class="figure">
+<img src="3D_PCA_df1_MLST.png" alt="3D PCA plot of df1 by the MLST clade difference" />
+<p class="caption"><strong>3D PCA plot of df1 by the MLST clade difference</strong></p>
+</div>
+<p><strong>d) Based on categories or type of infection: <em>commensal, food spoilage, invasive, starling, superficial</em> and <em>unknown</em></strong></p>
+<pre class="r"><code>#df1
+#Plotting 3D PCA plot by the categories
+
+plot3d(scores_df1_scaled[,1:3], col=c(1:7), size=4, type=&#39;p&#39;,pch=16 ,main=&quot;PCA-3D&quot;, forceClipregion = FALSE
+       )
+text3d(scores_df1_scaled[,1]+2, scores_df1_scaled[,2]+10, scores_df1_scaled[,3]+2,
+       texts=c(as.character(logFC_isolatesvsSC5314$Site)), cex= 0.7, pos=3)</code></pre>
+<div class="figure">
+<img src="3D_PCA_df1_category.png" alt="3D PCA plot of df1 by the MLST clade difference" />
+<p class="caption"><strong>3D PCA plot of df1 by the MLST clade difference</strong></p>
+</div>
+<p>We dont see any apparent clusters for df1 data based on the Infection category of isolates.</p>
+<p><strong><em>for df2</em></strong>:</p>
+<p><strong>a) Based on SNP based clades: <em>17 clades</em> and <em>1 Non-catergorized</em></strong></p>
+<pre class="r"><code>library(&quot;rgl&quot;)
+
+#obtaining the PC scores
+pca.data_df2_scaled &lt;- prcomp(df2_scaled)
+scores_df2_scaled = as.data.frame(pca.data_df2_scaled$x) 
+#summary(pca.data_df1_scaled)
+
+#Plotting 3D PCA plot by the SNP clade difference
+plot3d(scores_df2_scaled[,1:3], col=as.integer(logFC_Monovscoculture$CLADE_SNP), size=4, type=&#39;p&#39;,pch=16 ,main=&quot;PCA-3D&quot;, forceClipregion = FALSE
+       )
+text3d(scores_df2_scaled[,1]+2, scores_df2_scaled[,2]+10, scores_df2_scaled[,3]+2,
+       texts=c(as.character(logFC_Monovscoculture$CLADE_SNP)), cex= 1, pos=3)</code></pre>
+<div class="figure">
+<img src="3D_PCA_df2_SNP.png" alt="3D PCA plot of df2 by the SNP clade difference" />
+<p class="caption"><strong>3D PCA plot of df2 by the SNP clade difference</strong></p>
+</div>
+<p>We dont see any apparent clusters for df2 data based on the SNP clades.</p>
+<p><strong>b) Based on MLST based clades: <em>14 clades</em> and <em>Non-categorized</em></strong></p>
+<pre class="r"><code>#df1
+#Plotting 3D PCA plot by the MLST clade difference
+
+plot3d(scores_df2_scaled[,1:3], col=as.integer(logFC_Monovscoculture$CLADE_MLST), size=4, type=&#39;p&#39;,pch=16 ,main=&quot;PCA-3D&quot;, forceClipregion = FALSE
+       )
+text3d(scores_df2_scaled[,1]+2, scores_df2_scaled[,2]+10, scores_df2_scaled[,3]+2,
+       texts=c(as.character(logFC_Monovscoculture$CLADE_MLST)), cex= 1, pos=3)</code></pre>
+<p>We dont see any apparent clusters for df2 data based on the MLST clades.</p>
+<div class="figure">
+<img src="3D_PCA_df2_MLST.png" alt="3D PCA plot of df2 by the MLST clade difference" />
+<p class="caption"><strong>3D PCA plot of df2 by the MLST clade difference</strong></p>
+</div>
+<p><strong>c) Based on categories or type of infection: <em>commensal, food spoilage, invasive, starling, superficial</em> and <em>unknown</em></strong></p>
+<pre class="r"><code>#df1
+#Plotting 3D PCA plot by the categories
+
+plot3d(scores_df2_scaled[,1:3], col=c(1:7), size=4, type=&#39;p&#39;,pch=16 ,main=&quot;PCA-3D&quot;, forceClipregion = FALSE
+       )
+text3d(scores_df1_scaled[,1]+2, scores_df1_scaled[,2]+10, scores_df1_scaled[,3]+2,
+       texts=c(as.character(logFC_Monovscoculture$Site)), cex= 0.7, pos=3)</code></pre>
+<div class="figure">
+<img src="3D_PCA_df2_category.png" alt="3D PCA plot of df2 by the categories difference" />
+<p class="caption"><strong>3D PCA plot of df2 by the categories difference</strong></p>
+</div>
+<p>We dont see any apparent clusters for df2 data based on the Infection category of isolates.</p>
+</div>
+</div>
+<div id="importance-of-assessing-clustering-tendency" class="section level2">
+<h2>3) Importance of assessing clustering tendency</h2>
+<p>In order to illustrate why it’s important to assess cluster tendency, we start by computing k-means clustering and hierarchical clustering on the two data sets (df1 and df2).</p>
+<p>The function <em>fviz_cluster()</em> and <em>fviz_dend()</em> <em>[in factoextra R package]</em> will be used to visualize the results.</p>
+<p><strong>df1 dataset based on k=2</strong>:</p>
+<pre class="r"><code>library(factoextra)
+set.seed(123)
+# K-means on df1 dataset (based on 2 clusters)
+km.res1_df1 &lt;- kmeans(df1_scaled, 2)
+fviz_cluster(list(data = df1_scaled, cluster = km.res1_df1$cluster),
+             pointsize = 2, labelsize = 6,
+             ellipse.type = &quot;norm&quot;, geom = c(&quot;point&quot;,&quot;text&quot;), stand = FALSE,
+             palette = &quot;jco&quot;, ggtheme = theme_classic())</code></pre>
+<p><img src="Clust_tend_files/figure-html/K-means%20clustering%20of%20df1%20(2clusters)-1.png" width="672" /> <strong>K-means cluster plot of df1 dataset representing 2 clusters</strong></p>
+<p><strong>df1 dataset based on k=3</strong>:</p>
+<pre class="r"><code># K-means on df1 dataset (based on 3 clusters)
+km.res1_df1 &lt;- kmeans(df1_scaled, 3)
+fviz_cluster(list(data = df1_scaled, cluster = km.res1_df1$cluster),
+             pointsize = 2, labelsize = 6,
+             ellipse.type = &quot;norm&quot;, geom = c(&quot;point&quot;,&quot;text&quot;), stand = FALSE,
+             palette = &quot;jco&quot;, ggtheme = theme_classic())</code></pre>
+<p><img src="Clust_tend_files/figure-html/K-means%20clustering%20of%20df1%20(3clusters)-1.png" width="672" /> <strong>K-means cluster plot of df1 dataset representing 3 clusters</strong></p>
+<p><strong>df1 dataset based on k=4</strong>:</p>
+<pre class="r"><code># K-means on df1 dataset (based on 4 clusters)
+km.res1_df1 &lt;- kmeans(df1_scaled, 4)
+fviz_cluster(list(data = df1_scaled, cluster = km.res1_df1$cluster),
+             pointsize = 2, labelsize = 6,
+             ellipse.type = &quot;norm&quot;, geom = c(&quot;point&quot;,&quot;text&quot;), stand = FALSE,
+             palette = &quot;jco&quot;, ggtheme = theme_classic())</code></pre>
+<p><img src="Clust_tend_files/figure-html/K-means%20clustering%20of%20df1%20(4clusters)-1.png" width="672" /> <strong>K-means cluster plot of df1 dataset representing 4 clusters</strong></p>
+<p>likewise, we can also calculate k-means custering for df2 dataset:</p>
+<p><strong>df2 dataset based on k=3</strong>:</p>
+<pre class="r"><code># K-means on df1 dataset (based on 3 clusters)
+km.res2_df2 &lt;- kmeans(df2_scaled, 3)
+fviz_cluster(list(data = df2_scaled, cluster = km.res2_df2$cluster),
+             pointsize = 2, labelsize = 6,
+             ellipse.type = &quot;norm&quot;, geom = c(&quot;point&quot;,&quot;text&quot;), stand = FALSE,
+             palette = &quot;jco&quot;, ggtheme = theme_classic())</code></pre>
+<p><img src="Clust_tend_files/figure-html/K-means%20clustering%20of%20df2%20(3clusters)-1.png" width="672" /> <strong>K-means cluster plot of df2 dataset representing 3 clusters</strong></p>
+<p><strong>df2 dataset based on k=4</strong>:</p>
+<pre class="r"><code># K-means on df2 dataset (based on 4 clusters)
+km.res2_df2 &lt;- kmeans(df2_scaled, 4)
+fviz_cluster(list(data = df2_scaled, cluster = km.res2_df2$cluster),
+             pointsize = 2, labelsize = 6,
+             ellipse.type = &quot;norm&quot;, geom = c(&quot;point&quot;,&quot;text&quot;), stand = FALSE,
+             palette = &quot;jco&quot;, ggtheme = theme_classic())</code></pre>
+<p><img src="Clust_tend_files/figure-html/K-means%20clustering%20of%20df2%20(4clusters)-1.png" width="672" /> <strong>K-means cluster plot of df2 dataset representing 4 clusters</strong></p>
+<p><strong>Heirarchial clustering of df1 data based on k=4</strong>:</p>
+<pre class="r"><code># Hierarchical clustering on the df1 dataset
+
+fviz_dend(hclust(dist(df1_scaled)), k = 4, k_colors = &quot;jco&quot;,  
+          as.ggplot = TRUE, show_labels = FALSE)</code></pre>
+<p><img src="Clust_tend_files/figure-html/Heirarchial%20clustering%20of%20df1%20(4clusters)-1.png" width="672" /> <strong>Cluster Dendogram of df1 dataset representing 4 clusters</strong></p>
+<p><strong>Heirarchial clustering of df2 data based on k=4</strong>:</p>
+<pre class="r"><code># Hierarchical clustering on the df2 dataset
+
+fviz_dend(hclust(dist(df2_scaled)), k = 4, k_colors = &quot;jco&quot;,  
+          as.ggplot = TRUE, show_labels = FALSE)</code></pre>
+<p><img src="Clust_tend_files/figure-html/Heirarchial%20clustering%20of%20df2%20(4clusters)-1.png" width="672" /> <strong>Cluster Dendogram of df2 dataset representing 4 clusters</strong></p>
+<p>Thus, It can be seen that the k-means algorithm and the hierarchical clustering impose a classification on any data set even if there are no meaningful clusters present in it. This is why, clustering tendency assessment methods should be used to evaluate the validity of clustering analysis. That is, whether a given data set contains meaningful clusters.</p>
+</div>
+<div id="methods-for-assessing-clustering-tendency" class="section level2">
+<h2>4) Methods for assessing clustering tendency</h2>
+<p>There are two methods for evaluating the clustering tendency:</p>
+<p>** i) a statistical (Hopkins statistic)** and ** ii) a visual methods (Visual Assessment of cluster Tendency (VAT) algorithm).**</p>
+<div id="statistical-threshols" class="section level3">
+<h3>4.1) Statistical threshols</h3>
+<p>The null and the alternative hypotheses are defined as follows:</p>
+<p><strong>Null hypothesis</strong>: the data set D is uniformly distributed (i.e., no meaningful clusters)</p>
+<p><strong>Alternative hypothesis</strong>: the data set D is not uniformly distributed (i.e., contains meaningful clusters)</p>
+<p>We can conduct the Hopkins Statistic test iteratively, using 0.5 as the threshold to reject the alternative hypothesis. That is, if H &lt; 0.5, then it is unlikely that D has statistically significant clusters.</p>
+<p>In other words, If the value of Hopkins statistic is close to 1, then we can reject the null hypothesis and conclude that the dataset D is significantly a clusterable data.</p>
+<p>There are two R functions / packages to statistically evaluate clustering tendency by computing the Hopkins statistics:</p>
+<ul>
+<li><strong><em>get_clust_tendency()</em></strong> function <em>[in factoextra package]</em>. It returns the Hopkins statistics as defined in the formula above. The result is a list containing two elements:</li>
+</ul>
+<p><em>hopkins_stat</em> and <em>plot</em></p>
+<ul>
+<li><strong><em>hopkins()</em></strong> function <em>[in clustertend package]</em>. It implements 1- the definition of H provided here.</li>
+</ul>
+<p>In the R code below, we’ll use the <em>factoextra R</em> package. Make sure that you have the latest version (or install:</p>
+<p><strong><em>devtools::install_github(“kassambara/factoextra”))</em></strong></p>
+<p><strong>Hopkins statistic for df1 dataset</strong>:</p>
+<pre class="r"><code>library(factoextra)
+# Compute Hopkins statistic for df1 dataset
+res_hop_stat_df1 &lt;- get_clust_tendency(df1_scaled, n = nrow(df2_scaled)-1, graph = FALSE)
+
+res_hop_stat_df1$hopkins_stat</code></pre>
+<pre><code>## [1] 0.6900971</code></pre>
+<p><strong>Hopkins statistic for df2 dataset</strong>:</p>
+<pre class="r"><code># Compute Hopkins statistic for df2 dataset
+res_hop_stat_df2 &lt;- get_clust_tendency(df2_scaled, n = nrow(df2_scaled)-1, graph = FALSE)
+
+res_hop_stat_df2$hopkins_stat</code></pre>
+<pre><code>## [1] 0.6681672</code></pre>
+<p><strong>It can be seen that both the data sets data set are moderately clusterable (the H value = 0.69 and 0.67 (for df1 and df2 respectively) which is above the threshold 0.5)</strong>.</p>
+</div>
+</div>
+<div id="other-visual-methods" class="section level2">
+<h2>5) Other Visual methods</h2>
+<p>For the visual assessment of clustering tendency, we start by computing the correlations between observations using the function <strong>get_dist()</strong>. Next the function <strong>fviz_dist()</strong> <em>[factoextra package]</em> is used to display the correlation matrix.</p>
+<div id="computing-correlation-based-distances" class="section level3">
+<h3>5.1) Computing correlation based distances</h3>
+<p><strong>Correlation-based distances are commonly used in gene expression data analysis.</strong> Correlation method can be either <em>pearson, spearman</em> or <em>kendall</em>.</p>
+<p><strong>Computing correlation based distances for df1 dataset</strong></p>
+<pre class="r"><code># Compute
+library(&quot;factoextra&quot;)
+dist.cor_df1 &lt;- get_dist(df1_scaled, method = &quot;pearson&quot;)
+
+# Display a subset
+round(as.matrix(dist.cor_df1)[1:3, 1:3], 1)</code></pre>
+<pre><code>##            FP_CEC1289 FP_CEC1424 FP_CEC1427
+## FP_CEC1289        0.0        0.8        1.1
+## FP_CEC1424        0.8        0.0        1.1
+## FP_CEC1427        1.1        1.1        0.0</code></pre>
+<p><strong>Computing correlation based distances for df2 dataset</strong></p>
+<pre class="r"><code># Compute
+
+dist.cor_df2 &lt;- get_dist(df2_scaled, method = &quot;pearson&quot;)
+
+# Display a subset
+round(as.matrix(dist.cor_df2)[1:3, 1:3], 1)</code></pre>
+<pre><code>##                        FP_CEC1289vsTR_CEC1289 FP_CEC1424vsTR_CEC1424 FP_CEC1427vsTR_CEC1427
+## FP_CEC1289vsTR_CEC1289                    0.0                      1                    1.5
+## FP_CEC1424vsTR_CEC1424                    1.0                      0                    1.0
+## FP_CEC1427vsTR_CEC1427                    1.5                      1                    0.0</code></pre>
+</div>
+<div id="visualizing-distance-matrices" class="section level3">
+<h3>5.2) Visualizing distance matrices</h3>
+<p><strong>Visualizing distance matrices for df1 dataset</strong></p>
+<pre class="r"><code># Compute
+
+library(factoextra)
+fviz_dist(dist.cor_df1,lab_size = 5)</code></pre>
+<p><img src="Clust_tend_files/figure-html/Visualizing%20distance%20matrices%20for%20df1%20dataset-1.png" width="672" /></p>
+<p><strong>Visualization of Correlation matrix for df1 dataset</strong>. <em>Red</em>: high similarity (ie: low dissimilarity) | <em>Blue</em>: low similarity</p>
+<p><strong>Visualizing distance matrices for df2 dataset</strong></p>
+<pre class="r"><code># Compute
+
+library(factoextra)
+fviz_dist(dist.cor_df2,lab_size = 5)</code></pre>
+<p><img src="Clust_tend_files/figure-html/Visualizing%20distance%20matrices%20for%20df2%20dataset-1.png" width="672" /></p>
+<p><strong>Visualization of Correlation matrix for df2 dataset</strong>. <em>Red</em>: high similarity (ie: low dissimilarity) | <em>Blue</em>: low similarity</p>
+<p><strong>For a Randomly distributed dataset, correlation matrix looks like the one below:</strong></p>
+<div class="figure">
+<img src="correlation_matrix_random%20data.png" alt="Image of Correlation matrix of a random data" />
+<p class="caption"><strong>Image of Correlation matrix of a random data</strong></p>
+</div>
+<p><strong>Visualization of Correlation matrix for a random dataset</strong>. <em>Red</em>: high similarity (ie: low dissimilarity) | <em>Blue</em>: low similarity</p>
+<p>The color level is proportional to the value of the dissimilarity between observations: pure red if dist(xi,xj)=0 and pure blue if dist(xi,xj)=1. Objects belonging to the same cluster are displayed in consecutive order.</p>
+<p>The dissimilarity matrix image confirms that there is some cluster structure in both data sets but not in the random one.</p>
+</div>
+</div>
+</div>
+
+<p><b>Copyright &copy; 2020 Abhilash Kannan.</b></p>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

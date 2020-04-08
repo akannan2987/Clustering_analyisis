@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Abhilash Kannan" />
+
+
+<title>Cluster validation statistics</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Clustering analyis for Candida albicans</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Clust_tend.html">Clustering tendency</a>
+    </li>
+    <li>
+      <a href="optimal_clust_identification.html">Optimal number of clusters</a>
+    </li>
+    <li>
+      <a href="valid_stats.html">Validation Statistics</a>
+    </li>
+    <li>
+      <a href="Clustering_p_value.html">P-value for Heirarchial Clustering</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:abhilifesicizurich@gmail.com">
+    <span class="fa fa-question fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Cluster validation statistics</h1>
+<h4 class="author">Abhilash Kannan</h4>
+<h4 class="date">3/4/2020</h4>
+
+</div>
+
+
+<style type="text/css">
+
+body{ /* Normal  */
+  
+      
+  }
+td {  /* Table  */
+  
+}
+h1.title {
+  
+  color: DarkRed;
+}
+h1 { /* Header 1 */
+  
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+h4 { /* Header 4 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+h5 { /* Header 4 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+
+code.r{ /* Code block */
+    
+}
+pre { /* Code block - determines code spacing between lines */
+    
+}
+</style>
+<p>The term cluster validation is used to design the procedure of evaluating the goodness of clustering algorithm results. This is important to avoid finding patterns in a random data, as well as, in the situation where you want to compare two clustering algorithms.</p>
+<p>Generally, clustering validation statistics can be categorized into 3 classes (Charrad et al. 2014,Brock et al. (2008), Theodoridis and Koutroumbas (2008)):</p>
+<p><strong>1) Internal cluster validation</strong>, which uses the internal information of the clustering process to evaluate the goodness of a clustering structure without reference to external information. It can be also used for estimating the number of clusters and the appropriate clustering algorithm without any external data.</p>
+<p><strong>2) External cluster validation</strong>, which consists in comparing the results of a cluster analysis to an externally known result, such as externally provided class labels. It measures the extent to which cluster labels match externally supplied class labels. Since we know the “true” cluster number in advance, this approach is mainly used for selecting the right clustering algorithm for a specific data set.</p>
+<p><strong>3) Relative cluster validation</strong>, which evaluates the clustering structure by varying different parameter values for the same algorithm (e.g.,: varying the number of clusters k). It’s generally used for determining the optimal number of clusters.</p>
+<p>In this section, we describe the different methods for clustering validation. Next, we’ll demonstrate how to compare the quality of clustering results obtained with different clustering algorithms. Finally, we’ll provide R scripts for validating clustering results.</p>
+<p><strong>We’ll apply k-means, PAM and hierarchical clustering</strong>.</p>
+<div id="internal-cluster-validation-methods" class="section level2">
+<h2>1) Internal cluster validation methods</h2>
+<p>we describe the most widely used clustering validation indices. The goal of partitioning clustering algorithmsis to split the data set into clusters of objects, such that:</p>
+<ul>
+<li><p>The objects in the same cluster are similar as much as possible,</p></li>
+<li><p>and the objects in different clusters are highly distinct.</p></li>
+</ul>
+<p>we generally want the average distance within cluster to be as small as possible; and the average distance between clusters to be as large as possible</p>
+<p>Internal validation measures reflect often the compactness, the connectedness and the separation of the cluster partitions.</p>
+<p><strong>1) Compactness or cluster cohesion</strong>: Measures how close are the objects within the same cluster. A lower within-cluster variation is an indicator of a good compactness (i.e., a good clustering). The different indices for evaluating the compactness of clusters are base on distance measures such as the cluster-wise within average/median distances between observations.</p>
+<p><strong>2)Separation</strong>: Measures how well-separated a cluster is from other clusters. The indices used as separation measures include:</p>
+<ul>
+<li>distances between cluster centers</li>
+<li>The pairwise minimum distances between objects in different clusters.</li>
+</ul>
+<p><strong>3)Connectivity</strong>: corresponds to what extent items are placed in the same cluster as their nearest neighbors in the data space. The connectivity has a value between 0 and infinity and should be minimized.</p>
+<p>Generally most of the indices used for internal clustering validation combine compactness and separation measures as follow:</p>
+<div class="figure">
+<img src="Index.png" alt="Index" />
+<p class="caption"><strong>Index</strong></p>
+</div>
+<p>Where α and β are weights.</p>
+<p>we’ll describe the two commonly used indices for assessing the goodness of clustering: the <strong>silhouette width</strong> and the <strong>Dunn index</strong>. These internal measure can be used also to determine the optimal number of clusters in the data.</p>
+<div id="silhouette-coefficient" class="section level3">
+<h3>Silhouette coefficient</h3>
+<p>The silhouette analysis measures how well an observation is clustered and it estimates the average distance between clusters. The silhouette plot displays a measure of how close each point in one cluster is to points in the neighboring clusters.</p>
+<p>For each observation <em>i</em>, the silhouette width <em>si</em> is calculated as follows:</p>
+<ol style="list-style-type: decimal">
+<li><p>For each observation <em>i</em>, calculate the average dissimilarity <em>ai</em> between <em>i</em> and all other points of the cluster to which i belongs.</p></li>
+<li><p>For all other clusters <strong><em>C</em></strong>, to which <em>i</em> does not belong, calculate the average dissimilarity <em>d(i,C)</em> of <em>i</em> to all observations of C. The smallest of these <em>d(i,C)</em> is defined as <em>bi=minCd(i,C)</em>. The value of <em>bi</em> can be seen as the dissimilarity between <em>i</em> and its “neighbor” cluster, i.e., the nearest one to which it does not belong.</p></li>
+<li><p>Finally the silhouette width of the observation <em>i</em> is defined by the formula: <em>Si=(bi−ai)/max(ai,bi)</em></p></li>
+</ol>
+<p>Silhouette width can be interpreted as follow:</p>
+<ul>
+<li><p>Observations with a large <em>Si</em> (almost 1) are very well clustered.</p></li>
+<li><p>A small *Si (around 0) means that the observation lies between two clusters.</p></li>
+<li><p>Observations with a negative <em>Si</em> are probably placed in the wrong cluster.</p></li>
+</ul>
+<p>Dunn index</p>
+<p>The <strong>Dunn index</strong> is another internal clustering validation measure which can be computed as follow:</p>
+<ol style="list-style-type: decimal">
+<li><p>For each cluster, compute the distance between each of the objects in the cluster and the objects in the other clusters</p></li>
+<li><p>Use the minimum of this pairwise distance as the inter-cluster separation <em>(min.separation)</em></p></li>
+<li><p>For each cluster, compute the distance between the objects in the same cluster.</p></li>
+<li><p>Use the maximal intra-cluster distance (i.e maximum diameter) as the intra-cluster compactness</p></li>
+<li><p>Calculate the Dunn index (D) as follow:</p></li>
+</ol>
+<div class="figure">
+<img src="Dunn_index.png" alt="Dunn Index" />
+<p class="caption"><strong>Dunn Index</strong></p>
+</div>
+<p>If the data set contains compact and well-separated clusters, the diameter of the clusters is expected to be small and the distance between the clusters is expected to be large. Thus, Dunn index should be maximized.</p>
+</div>
+</div>
+<div id="external-measures-for-clustering-validation" class="section level2">
+<h2>External measures for clustering validation</h2>
+<p>The aim is to compare the identified clusters (by k-means, pam or hierarchical clustering) to an external reference.</p>
+<p>It’s possible to quantify the agreement between partitioning clusters and external reference using either the corrected <em>Rand index</em> and <em>Meila’s variation index VI</em>, which are implemented in the R function <em>cluster.stats()[fpc package]</em>.</p>
+<p>The corrected Rand index varies from -1 (no agreement) to 1 (perfect agreement).</p>
+<p>External clustering validation, can be used to select suitable clustering algorithm for a given data set.</p>
+</div>
+<div id="computation-of-cluster-validation" class="section level2">
+<h2>2) Computation of cluster validation</h2>
+<div id="required-packages" class="section level3">
+<h3>Required packages</h3>
+<ul>
+<li><p><em>factoextra</em> for data visualization</p></li>
+<li><p><em>fpc</em> for computing clustering validation statistics</p></li>
+<li><p><em>NbClust</em> for determining the optimal number of clusters in the data set.</p></li>
+<li><p>Install the packages:</p></li>
+</ul>
+<p><strong>code</strong>:</p>
+<p><strong>install.packages(c(“factoextra”, “fpc”, “NbClust”))</strong></p>
+<ul>
+<li>Load the packages</li>
+</ul>
+<pre class="r"><code># Load the packages
+
+library(factoextra)
+library(fpc)
+library(NbClust)</code></pre>
+</div>
+<div id="data-preparation" class="section level3">
+<h3>2.1) Data preparation</h3>
+<p>We’ll use two data sets:</p>
+<ul>
+<li><p><strong>Gene expression data - df1</strong> (log2FC of isolates vs SC5314 - 182 samples X 6217 genes from Monocultre and Coculture).</p></li>
+<li><p><strong>Gene expression data - df2</strong> (log2FC of isolates in Monoculture vs Coculture).</p></li>
+</ul>
+<pre class="r"><code>set.seed(123)
+
+#df1
+logFC_isolatesvsSC5314 &lt;- read.delim(&quot;/Users/Abhi/Desktop/Abhilash/study/Post-Doc/Lab_notebook/eQTL/Gene_expression_analysis/IsolatesvsSC5314/isolatesvsSC5314_LogFC_transpose.txt&quot;,
+                          row.names=&quot;isolate&quot;,stringsAsFactors = FALSE)
+
+#df2
+logFC_Monovscoculture &lt;- read.delim(&quot;/Users/Abhi/Desktop/Abhilash/study/Post-Doc/Lab_notebook/eQTL/Gene_expression_analysis/Isolates_conditions/Mono_coculture_isolates_LogFC_transpose.txt&quot;,
+                          row.names=&quot;isolate_comp&quot;,stringsAsFactors = FALSE)</code></pre>
+<p>The data sets look like this:</p>
+<pre class="r"><code>#df1
+head(logFC_isolatesvsSC5314, 3)
+
+#df2
+head(logFC_Monovscoculture, 3)</code></pre>
+<p>Check if there is any missing values, if found try to remove it.</p>
+<pre class="r"><code>#df1
+df1 &lt;- logFC_isolatesvsSC5314[,c(9:6225)]
+df1 &lt;- na.omit(df1)
+#df2
+df2 &lt;- logFC_Monovscoculture[,c(7:6223)]
+df2 &lt;- na.omit(df2)</code></pre>
+<p>we also don’t want the clustering algorithm to depend to an arbitrary variable unit, we start by scaling/standardizing the data using the R function scale():</p>
+<pre class="r"><code>#df1
+df1_scaled &lt;- scale(df1)
+
+#df2
+df2_scaled &lt;- scale(df2)</code></pre>
+</div>
+</div>
+<div id="clustering-analysis" class="section level2">
+<h2>3) Clustering analysis</h2>
+<p>We’ll use the function <em>eclust()</em> [enhanced clustering, in <em>factoextra</em>] which provides several advantages:</p>
+<ul>
+<li><p>It simplifies the workflow of clustering analysis</p></li>
+<li><p>It can be used to compute hierarchical clustering and partitioning clustering in a single line function call</p></li>
+<li><p>Compared to the standard partitioning functions (kmeans, pam, clara and fanny) which requires the user to specify the optimal number of clusters, the function eclust() computes automatically the gap statistic for estimating the right number of clusters.</p></li>
+<li><p>It provides silhouette information for all partitioning methods and hierarchical clustering</p></li>
+<li><p>It draws beautiful graphs using ggplot2</p></li>
+</ul>
+<p>The simplified format the eclust() function is as follow:</p>
+<p><strong>eclust(x, FUNcluster = “kmeans”, hc_metric = “euclidean”, …)</strong></p>
+<ul>
+<li><p><strong>x</strong>: numeric vector, data matrix or data frame</p></li>
+<li><p><strong>FUNcluster</strong>: a clustering function including “kmeans”, “pam”, “clara”, “fanny”, “hclust”, “agnes” and “diana”. Abbreviation is allowed.</p></li>
+<li><p><strong>hc_metric</strong>: character string specifying the metric to be used for calculating dissimilarities between observations. Allowed values are those accepted by the function dist() [including “euclidean”, “manhattan”, “maximum”, “canberra”, “binary”, “minkowski”] and correlation based distance measures [“pearson”, “spearman” or “kendall”]. Used only when FUNcluster is a hierarchical clustering function such as one of “hclust”, “agnes” or “diana”.</p></li>
+<li><p>…: other arguments to be passed to FUNcluster.</p></li>
+</ul>
+<p>The function <strong>eclust()</strong> returns an object of class eclust containing the result of the standard function used (e.g., kmeans, pam, hclust, agnes, diana, etc.).</p>
+<p>It includes also:</p>
+<ul>
+<li><strong>cluster</strong>: the cluster assignment of observations after cutting the tree</li>
+<li><strong>nbclust</strong>: the number of clusters</li>
+<li><strong>silinfo</strong>: the silhouette information of observations</li>
+<li><strong>size</strong>: the size of clusters</li>
+<li><strong>data</strong>: a matrix containing the original or the standardized data (if stand = TRUE)</li>
+<li><strong>gap_stat</strong>: containing gap statistics</li>
+</ul>
+<p>To compute a partitioning clustering, such as k-means clustering with k =2, and K=4 for df1 and df2 datasets respectively (based on the previous the section), we type this:</p>
+<div id="k-means-clustering" class="section level4">
+<h4>k-means clustering</h4>
+<p><strong>for df1</strong>:</p>
+<pre class="r"><code># K-means clustering for df1
+km.res_df1 &lt;- eclust(df1_scaled, &quot;kmeans&quot;, k = 2, nstart = 25, graph = FALSE)
+# Visualize k-means clusters
+fviz_cluster(km.res_df1, geom = &quot;point&quot;, ellipse.type = &quot;norm&quot;,
+             palette = &quot;jco&quot;, ggtheme = theme_minimal())</code></pre>
+<p><img src="cluster_valid_stat_files/figure-html/K-means%20clustering%20for%20df1%20dataset-1.png" width="672" /></p>
+<p><strong>for df2</strong>:</p>
+<pre class="r"><code># K-means clustering for df2
+km.res_df2 &lt;- eclust(df2_scaled, &quot;kmeans&quot;, k = 3, nstart = 25, graph = FALSE)
+# Visualize k-means clusters
+fviz_cluster(km.res_df2, geom = &quot;point&quot;, ellipse.type = &quot;norm&quot;,
+             palette = &quot;jco&quot;, ggtheme = theme_minimal())</code></pre>
+<p><img src="cluster_valid_stat_files/figure-html/K-means%20clustering%20for%20df2%20dataset-1.png" width="672" /></p>
+<p>#### To compute a hierarchical clustering, use this:</p>
+<p><strong>For df1 dataset</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df1
+
+hc.res_df1 &lt;- eclust(df1_scaled, &quot;hclust&quot;, k = 3, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+# Visualize dendrograms
+fviz_dend(hc.res_df1, show_labels = TRUE,
+         palette = &quot;jco&quot;, as.ggplot = TRUE)</code></pre>
+<p><img src="cluster_valid_stat_files/figure-html/Hierarchical%20clustering%20for%20df1%20dataset-1.png" width="672" /></p>
+<p><strong>For df2 dataset</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df2
+
+hc.res_df2 &lt;- eclust(df2_scaled, &quot;hclust&quot;, k = 4, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+# Visualize dendrograms
+fviz_dend(hc.res_df2, show_labels = TRUE,
+         palette = &quot;jco&quot;, as.ggplot = TRUE)</code></pre>
+<p><img src="cluster_valid_stat_files/figure-html/Hierarchical%20clustering%20for%20df2%20dataset-1.png" width="672" /></p>
+</div>
+</div>
+<div id="clustering-validation" class="section level2">
+<h2>4) Clustering validation</h2>
+<div id="silhouette-plot" class="section level3">
+<h3>Silhouette plot</h3>
+<p>Recall that the silhouette coefficient <em>(Si)</em> measures how similar an object <em>i</em> is to the the other objects in its own cluster versus those in the neighbor cluster. <em>Si</em> values range from 1 to - 1:</p>
+<ul>
+<li><p>A value of <em>Si</em> close to 1 indicates that the object is well clustered. In the other words, the object <em>i</em> is similar to the other objects in its group.</p></li>
+<li><p>A value of <em>Si</em> close to -1 indicates that the object is poorly clustered, and that assignment to some other cluster would probably improve the overall results.</p></li>
+<li><p>It’s possible to draw silhouette coefficients of observations using the function <em>fviz_silhouette()</em> [factoextra package], which will also print a summary of the silhouette analysis output. To avoid this, you can use the option print.summary = FALSE.</p></li>
+</ul>
+<p><strong>Silhouette plot for df1 dataset</strong>:</p>
+<pre class="r"><code># Silhouette plot for df1
+fviz_silhouette(hc.res_df1, label = TRUE, print.summary = TRUE)</code></pre>
+<pre><code>##   cluster size ave.sil.width
+## 1       1   97          0.01
+## 2       2   46          0.23
+## 3       3   39          0.44</code></pre>
+<p><img src="cluster_valid_stat_files/figure-html/Silhouette%20plot%20for%20df1%20dataset-1.png" width="672" /></p>
+<p><strong>Silhouette plot for df2 dataset</strong>:</p>
+<pre class="r"><code># Silhouette plot for df2
+fviz_silhouette(hc.res_df2, label = TRUE, print.summary = TRUE)</code></pre>
+<pre><code>##   cluster size ave.sil.width
+## 1       1   31          0.32
+## 2       2   23          0.33
+## 3       3   23          0.22
+## 4       4   15          0.17</code></pre>
+<p><img src="cluster_valid_stat_files/figure-html/Silhouette%20plot%20for%20df2%20dataset-1.png" width="672" /></p>
+<p>Silhouette information can be extracted as follow:</p>
+<p><strong>For df1</strong>:</p>
+<pre class="r"><code># df1
+# Silhouette information
+silinfo_df1 &lt;- hc.res_df1$silinfo
+names(silinfo_df1)</code></pre>
+<pre><code>## [1] &quot;widths&quot;          &quot;clus.avg.widths&quot; &quot;avg.width&quot;</code></pre>
+<pre class="r"><code># Silhouette widths of each observation
+head(silinfo_df1$widths[, 1:3], 10)</code></pre>
+<pre><code>##            cluster neighbor sil_width
+## TR_CEC708        1        2 0.2220460
+## TR_CEC712        1        2 0.2099772
+## FP_CEC712        1        2 0.1785185
+## FP_CEC723        1        2 0.1716416
+## TR_CEC1289       1        2 0.1711504
+## TR_CEC4497       1        3 0.1658429
+## FP_CEC4482       1        2 0.1572901
+## FP_CEC4500       1        3 0.1553710
+## TR_CEC4024       1        2 0.1532419
+## FP_CEC4261       1        2 0.1524357</code></pre>
+<pre class="r"><code># Average silhouette width of each cluster
+silinfo_df1$clus.avg.widths</code></pre>
+<pre><code>## [1] 0.01238765 0.23196401 0.43902924</code></pre>
+<pre class="r"><code># The total average (mean of all individual silhouette widths)
+silinfo_df1$avg.width</code></pre>
+<pre><code>## [1] 0.1593082</code></pre>
+<pre class="r"><code># The size of each clusters
+hc.res_df1$size</code></pre>
+<pre><code>## [1] 97 46 39</code></pre>
+<p>It can be seen that several samples, in cluster 1, have a negative silhouette coefficient. This means that they are not in the right cluster. We can find the name of these samples and determine the clusters they are closer (neighbor cluster), as follows:</p>
+<pre class="r"><code># Silhouette width of observation
+sil_df1 &lt;- hc.res_df1$silinfo$widths[, 1:3]
+# Objects with negative silhouette
+neg_sil_index_df1 &lt;- which(sil_df1[, &#39;sil_width&#39;] &lt; 0)
+sil_df1[neg_sil_index_df1, , drop = FALSE]</code></pre>
+<pre><code>##              cluster neighbor    sil_width
+## TR_CEC3685         1        2 -0.003605604
+## FP_CEC4486         1        2 -0.005153462
+## FP_CEC3621_1       1        2 -0.019310169
+## TR_CEC3675         1        3 -0.020620795
+## TR_CEC4035         1        2 -0.020903132
+## TR_CEC3715         1        2 -0.024563333
+## FP_CEC3600         1        2 -0.029048907
+## TR_CEC3534         1        2 -0.031376658
+## FP_CEC3712         1        3 -0.044268401
+## TR_CEC5114         1        2 -0.046959770
+## FP_CEC3704         1        2 -0.048318334
+## FP_CEC3607         1        2 -0.049554668
+## FP_CEC3707         1        3 -0.066314059
+## FP_CEC4512         1        2 -0.069621220
+## TR_CEC4489         1        3 -0.077165044
+## FP_CEC3548         1        3 -0.089300034
+## TR_CEC3551         1        3 -0.091626367
+## TR_CEC3708         1        2 -0.092368958
+## FP_CEC2021         1        3 -0.099718115
+## TR_CEC4479         1        3 -0.108258517
+## FP_CEC4945         1        2 -0.108944016
+## TR_CEC2872         1        3 -0.115681041
+## FP_CEC4693         1        3 -0.128255948
+## FP_CEC3675         1        2 -0.130315199
+## TR_CEC3549         1        3 -0.134019133
+## TR_CEC4510         1        3 -0.137168449
+## FP_CEC4479         1        2 -0.138902853
+## TR_CEC4486         1        3 -0.163721142
+## FP_CEC1492         1        3 -0.174449764
+## TR_CEC4254         1        3 -0.189184835
+## TR_CEC3600         1        3 -0.218194160
+## TR_CEC3530         1        3 -0.228750078
+## TR_CEC3669         1        3 -0.282861579
+## FP_CEC5120         1        2 -0.286016787
+## TR_CEC3660         1        3 -0.324641878
+## TR_CEC3615         1        3 -0.453257838
+## TR_CEC4943         2        3 -0.013805605
+## TR_CEC4104         2        3 -0.101169926</code></pre>
+<p><strong>For df2</strong>:</p>
+<pre class="r"><code># df2
+# Silhouette information
+silinfo_df2 &lt;- hc.res_df2$silinfo
+names(silinfo_df2)</code></pre>
+<pre><code>## [1] &quot;widths&quot;          &quot;clus.avg.widths&quot; &quot;avg.width&quot;</code></pre>
+<pre class="r"><code># Silhouette widths of each observation
+head(silinfo_df2$widths[, 1:3], 10)</code></pre>
+<pre><code>##                        cluster neighbor sil_width
+## FP_CEC712vsTR_CEC712         1        2 0.5132440
+## FP_CEC4492vsTR_CEC4492       1        2 0.4815406
+## FP_CEC2018vsTR_CEC2018       1        2 0.4764906
+## FP_CEC1289vsTR_CEC1289       1        2 0.4699109
+## FP_CEC4498vsTR_CEC4498       1        2 0.4690994
+## FP_CEC3554vsTR_CEC3554       1        4 0.4672346
+## FP_CEC4660vsTR_CEC4660       1        4 0.4635509
+## FP_CEC2023vsTR_CEC2023       1        4 0.4585799
+## FP_SC5314vsTR_SC5314         1        2 0.4477848
+## FP_CEC3607vsTR_CEC3607       1        2 0.4449884</code></pre>
+<pre class="r"><code># Average silhouette width of each cluster
+silinfo_df2$clus.avg.widths</code></pre>
+<pre><code>## [1] 0.3174061 0.3295103 0.2184721 0.1722193</code></pre>
+<pre class="r"><code># The total average (mean of all individual silhouette widths)
+silinfo_df2$avg.width</code></pre>
+<pre><code>## [1] 0.2720269</code></pre>
+<pre class="r"><code># The size of each clusters
+hc.res_df2$size</code></pre>
+<pre><code>## [1] 31 23 23 15</code></pre>
+<p>It can be seen that few samples in all the clusters, have a negative silhouette coefficient. This means that they are not in the right cluster. We can find the name of these samples and determine the clusters they are closer (neighbor cluster), as follows:</p>
+<pre class="r"><code># Silhouette width of observation
+sil_df2 &lt;- hc.res_df2$silinfo$widths[, 1:3]
+# Objects with negative silhouette
+neg_sil_index_df2 &lt;- which(sil_df2[, &#39;sil_width&#39;] &lt; 0)
+sil_df2[neg_sil_index_df2, , drop = FALSE]</code></pre>
+<pre><code>##                        cluster neighbor   sil_width
+## FP_CEC3618vsTR_CEC3618       1        2 -0.05066530
+## FP_CEC3610vsTR_CEC3610       3        4 -0.10209272
+## FP_CEC4693vsTR_CEC4693       4        1 -0.03813372
+## FP_CEC4502vsTR_CEC4502       4        2 -0.15003680</code></pre>
+</div>
+</div>
+<div id="validation-statistics" class="section level2">
+<h2>5) Validation statistics</h2>
+<p>The function <em>cluster.stats()</em> [fpc package] and the function <strong><em>NbClust()</em></strong> [in NbClust package] can be used to compute Dunn index and many other cluster validation statistics or indices.</p>
+<p>The simplified format is:</p>
+<p><strong>cluster.stats(d = NULL, clustering, al.clustering = NULL)</strong></p>
+<ul>
+<li><p><strong>d</strong>: a distance object between cases as generated by the dist() function</p></li>
+<li><p><strong>clustering</strong>: vector containing the cluster number of each observation</p></li>
+<li><p><strong>alt.clustering</strong>: vector such as for clustering, indicating an alternative clustering</p></li>
+</ul>
+<p>The function <strong>cluster.stats()</strong> returns a list containing many components useful for analyzing the intrinsic characteristics of a clustering:</p>
+<ul>
+<li><p><strong>cluster.number</strong>: number of clusters</p></li>
+<li><p><strong>cluster.size</strong>: vector containing the number of points in each cluster</p></li>
+<li><p><strong>average.distance, median.distance</strong>: vector containing the cluster-wise within average/median distances</p></li>
+<li><p><strong>average.between</strong>: average distance between clusters. We want it to be as large as possible</p></li>
+<li><p><strong>average.within</strong>: average distance within clusters. We want it to be as small as possible</p></li>
+<li><p><strong>clus.avg.silwidths</strong>: vector of cluster average silhouette widths. Recall that, the silhouette width is also an estimate of the average distance between clusters. Its value is comprised between 1 and -1 with a value of 1 indicating a very good cluster.</p></li>
+<li><p><strong>within.cluster.ss</strong>: a generalization of the within clusters sum of squares (k-means objective function), which is obtained if d is a Euclidean distance matrix.</p></li>
+<li><p><strong>dunn, dunn2</strong>: Dunn index</p></li>
+<li><p><strong>corrected.rand, vi</strong>: Two indexes to assess the similarity of two clustering: the corrected Rand index and Meila’s VI</p></li>
+</ul>
+<p>All the above elements can be used to evaluate the internal quality of clustering.</p>
+<p>In the following section, we’ll compute the clustering quality statistics for herirarchial clustering. Look at the <strong>within.cluster.ss</strong> (within clusters sum of squares), <strong>the average.within</strong> (average distance within clusters) and <strong>clus.avg.silwidths</strong> (vector of cluster average silhouette widths).</p>
+<p><strong>for dataset df1</strong>:</p>
+<pre class="r"><code>library(fpc)
+#df1
+# Statistics for heirarchial clustering
+hc.res_stats_df1 &lt;- cluster.stats(get_dist(df1_scaled, method = &quot;pearson&quot;),  hc.res_df1$cluster)
+# Dun index
+hc.res_stats_df1$dunn</code></pre>
+<pre><code>## [1] 0.1734482</code></pre>
+<pre class="r"><code>#To display all statistics
+#hc.res_stats_df1</code></pre>
+<p><strong>for dataset df2</strong>:</p>
+<pre class="r"><code>#df2
+# Statistics for heirarchial clustering
+hc.res_stats_df2 &lt;- cluster.stats(get_dist(df2_scaled, method = &quot;pearson&quot;),  hc.res_df2$cluster)
+# Dun index
+hc.res_stats_df2$dunn</code></pre>
+<pre><code>## [1] 0.2797127</code></pre>
+<pre class="r"><code>#To display all statistics
+#hc.res_stats_df2</code></pre>
+</div>
+<div id="external-clustering-validation" class="section level2">
+<h2>6) External clustering validation</h2>
+<p>Among the values returned by the function <em>cluster.stats()</em>, there are two indexes to assess the similarity of two clustering, namely the corrected Rand index and Meila’s VI.</p>
+<p>We know that that the expression data contains isolates from 18 clades based on SNP differences and 15 clades based on MLSTs and 6 sites of infection and 2 culture types (Monoculture and Coculture).</p>
+<p><strong>Does the Hierarchial clustering match with the true structure of the data?</strong></p>
+<p>We can use the function <strong><em>cluster.stats()</em></strong> to answer to this question.</p>
+<p>We first start by defining groups already known from the data</p>
+<p><strong>Defining Groups df1 and df2 dataset</strong>:</p>
+<p>This is required for the cluster validation</p>
+<pre class="r"><code># df1
+
+#Groups for df1 based on SNP clades
+group_df1_SNP &lt;- factor(logFC_isolatesvsSC5314$CLADE_SNP_numeric, levels = unique(logFC_isolatesvsSC5314$CLADE_SNP_numeric))
+group_df1_SNP
+
+#Groups for df1 based on MLST clades
+group_df1_MLST &lt;- factor(logFC_isolatesvsSC5314$CLADE_MLST_numeric, levels = unique(logFC_isolatesvsSC5314$CLADE_MLST_numeric))
+group_df1_MLST
+
+#Groups for df1 based on site of infection
+group_df1_site &lt;- factor(logFC_isolatesvsSC5314$Site_numeric, levels = unique(logFC_isolatesvsSC5314$Site_numeric))
+group_df1_site
+
+#Groups for df1 based on culture type
+group_df1_culture &lt;- factor(logFC_isolatesvsSC5314$culture_type_numeric, levels = unique(logFC_isolatesvsSC5314$culture_type_numeric))
+group_df1_culture
+
+#df2
+
+#Groups for df2 based on SNP clades
+group_df2_SNP &lt;- factor(logFC_Monovscoculture$CLADE_SNP_numeric, levels = unique(logFC_Monovscoculture$CLADE_SNP_numeric))
+group_df2_SNP
+
+#Groups for df2 based on MLST clades
+group_df2_MLST &lt;- factor(logFC_Monovscoculture$CLADE_MLST_numeric, levels = unique(logFC_Monovscoculture$CLADE_MLST_numeric))
+group_df2_MLST
+
+#Groups for df2 based on site of infection
+group_df2_site &lt;- factor(logFC_Monovscoculture$Site_Numeric, levels = unique(logFC_Monovscoculture$Site_Numeric))
+group_df2_site</code></pre>
+<div id="cross-tabulation-and-statistics" class="section level3">
+<h3>6.1) Cross tabulation and statistics:</h3>
+<p>We can computing a cross-tabulation between Heirarchial clusters and the reference groups:</p>
+<div id="cross-tabulation-for-df1" class="section level4">
+<h4>Cross tabulation for df1:</h4>
+<p><strong>for df1 based on SNP clades</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df1 keeping  n = 18 (no of SNP clades)
+
+hc.res_df1 &lt;- eclust(df1_scaled, &quot;hclust&quot;, k = 18, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+#df1 based on SNP clades
+
+table(group_df1_SNP, hc.res_df1$cluster)</code></pre>
+<pre><code>##              
+## group_df1_SNP  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18
+##           3    7  0  2  0  0  0  0  0  0  0  0  0  0  0  0  0  1  0
+##           1    0  4  5  2  0  0  0  1  2  0  0  0  0  0  5  7  0  0
+##           4    0  0  4  1  0  0 11  0  4  0  2  0  0  0  6  0  0  0
+##           9    0  0  2  0  2  1  0  1  0  0  2  0  0  0  2  0  2  0
+##           2    0  0  3  0  0  4  0  2  1  0  0  0  0  0  2  0  0  4
+##           8    0  0  0  0  0  0  0  2  1  0  1  0  0  0  2  0  0  0
+##           18   1  0  0  0  0  0  0  1  1  0  0  0  0  0  1  0  0  0
+##           11   0  0  1  0  0  0  0  0  1  6  1  0  0  0  3  3  1  0
+##           12   0  0  0  0  0  0  0  3  1  0  0  0  0  0  0  2  2  0
+##           200  0  0  2  0  1  0  0  0  0  0  0  0  1  0  2  0  0  0
+##           16   0  0  1  3  0  0  0  0  0  0  0  0  0  0  1  0  1  0
+##           10   0  0  1  0  0  0  0  0  0  2  1  0  0  3  1  0  0  0
+##           300  0  0  1  0  0  1  0  2  0  0  3  0  0  0  2  0  1  0
+##           203  0  0  0  0  1  0  0  0  0  0  0  0  3  0  0  0  0  0
+##           201  0  0  1  0  0  2  0  0  0  0  0  0  0  0  0  1  0  0
+##           204  0  0  0  0  0  1  0  0  0  0  0  0  2  0  1  0  0  0
+##           202  0  0  1  0  0  0  0  0  1  0  2  0  0  0  0  0  0  0
+##           13   0  0  0  0  0  0  0  0  0  0  0 10  0  0  0  0  0  0</code></pre>
+<p>It’s possible to quantify the agreement between SNP clades and heirarchial clusters using either the corrected Rand index and Meila’s VI provided as follows:</p>
+<pre class="r"><code>library(&quot;fpc&quot;)
+# Compute cluster stats
+SNPs_df1 &lt;- as.numeric(group_df1_SNP)
+clust_stats_SNPs_df1 &lt;- cluster.stats(d = get_dist(df1_scaled, method = &quot;pearson&quot;), SNPs_df1, hc.res_df1$cluster)
+# Corrected Rand index
+clust_stats_SNPs_df1$corrected.rand</code></pre>
+<pre><code>## [1] 0.1537355</code></pre>
+<pre class="r"><code>clust_stats_SNPs_df1$vi</code></pre>
+<pre><code>## [1] 2.80954</code></pre>
+<p>The corrected Rand index provides a measure for assessing the similarity between two partitions, adjusted for chance. Its range is -1 (no agreement) to 1 (perfect agreement). There seems to be no strong agreement between the SNP clades and the cluster solution (Rand index = 0.15). <strong>However, we can see that</strong>:</p>
+<ul>
+<li><p><strong>1) Cluster 1 contains predominantly isolates from Clade 3</strong></p></li>
+<li><p><strong>2) Cluster 2 contains isolates from Clade 4</strong></p></li>
+<li><p><strong>Cluster 7 —&gt; clade 4</strong></p></li>
+<li><p><strong>Cluster 12 —-&gt; clade 13</strong> and</p></li>
+<li><p><strong>Cluster 18 —&gt; clade 4</strong></p></li>
+</ul>
+<p>Of these, <strong>cluster12-Clade 13</strong> looks quite interesting This was seen clearly from the 3D PCA plot constructed in the previous section:</p>
+<div class="figure">
+<img src="3D_PCA_df1_SNP.png" alt="3D PCA plot of df1 by the SNP clade difference" />
+<p class="caption"><strong>3D PCA plot of df1 by the SNP clade difference</strong></p>
+</div>
+<p><strong>For df1 based on MLST clades</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df1 keeping  n = 15 (no of MLST clades)
+
+hc.res_df1 &lt;- eclust(df1_scaled, &quot;hclust&quot;, k = 15, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+#df1 based on MLST clades
+
+table(group_df1_MLST, hc.res_df1$cluster)</code></pre>
+<pre><code>##               
+## group_df1_MLST  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+##            3    4  0  3  0  1  0  0  0  0  0  0  1  1  2  0
+##            1    2  5  5  2  0  0  0  1  0  0  0  0  0  4  7
+##            300  0  1  4  0  1  4  0  2  0  4  0  5  2  4  1
+##            4    0  4  3  1  0  0 11  0  0  2  0  0  0  5  0
+##            9    0  0  1  0  1  1  0  0  0  1  0  0  0  2  0
+##            2    0  0  3  0  0  4  0  2  0  0  0  0  0  1  4
+##            8    0  1  0  0  0  0  0  2  0  1  0  0  0  2  0
+##            18   1  1  0  0  0  0  0  1  0  0  0  0  0  1  0
+##            11   0  1  0  0  0  0  0  0  5  0  0  0  1  3  2
+##            12   0  0  0  0  0  0  0  3  0  0  0  0  2  0  1
+##            16   0  0  0  3  0  0  0  0  0  0  0  0  0  1  0
+##            10   0  0  1  0  0  0  0  0  1  0  0  0  3  1  0
+##            0    1  3  4  0  1  0  0  0  2  4  2  0  1  2  2
+##            7    0  0  0  0  0  0  0  1  0  0  0  0  1  0  0
+##            13   0  0  0  0  0  0  0  0  0  0  2  0  0  0  0
+##            400  0  0  0  0  0  0  0  0  0  0  6  0  0  0  0</code></pre>
+<p><strong>Quantifying the agreement between MLST clades and heirarchial clusters using either the corrected Rand index</strong>:</p>
+<pre class="r"><code>library(&quot;fpc&quot;)
+# Compute cluster stats
+MLST_df1 &lt;- as.numeric(group_df1_MLST)
+clust_stats_MLST_df1 &lt;- cluster.stats(d = get_dist(df1_scaled, method = &quot;pearson&quot;), MLST_df1, hc.res_df1$cluster)
+
+# Corrected Rand index
+clust_stats_MLST_df1$corrected.rand</code></pre>
+<pre><code>## [1] 0.09202468</code></pre>
+<p>Agreement between the MLST clade classification and the cluster solution is &lt;0.1 using Rand index which is very low to say that these isolates cluster according to the MLST clades. <strong>However, we see that isolates belonging to C.africa clade cluster together (cluster 11)</strong>. This was seens clearly in the 3D pCA plots that were constructed in the previous scetion:</p>
+<div class="figure">
+<img src="3D_PCA_df1_MLST.png" alt="3D PCA plot of df1 by the MLST clade difference" />
+<p class="caption"><strong>3D PCA plot of df1 by the MLST clade difference</strong></p>
+</div>
+<p><strong>For df1 based on sites of infection</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df1 keeping  n = 6 (no of sites)
+
+hc.res_df1 &lt;- eclust(df1_scaled, &quot;hclust&quot;, k = 6, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+#df1 based on site of infection
+
+table(group_df1_site, hc.res_df1$cluster)</code></pre>
+<pre><code>##               
+## group_df1_site  1  2  3  4  5  6
+##              1  7  7  7  0  7  2
+##              2 13 14 12 10 17  6
+##              0  1  0  0  0  1  0
+##              3  9 11 11  0 10  5
+##              4  3  0  0  0  1  0
+##              6  3  2  2  0  1  0
+##              5  7  3  4  0  2  4</code></pre>
+<p><strong>Quantifying the agreement between infection_sites and heirarchial clusters using either the corrected Rand index</strong>:</p>
+<pre class="r"><code>library(&quot;fpc&quot;)
+# Compute cluster stats
+site_df1 &lt;- as.numeric(group_df1_site)
+clust_stats_site_df1 &lt;- cluster.stats(d = get_dist(df1_scaled, method = &quot;pearson&quot;), site_df1, hc.res_df1$cluster)
+
+# Corrected Rand index
+clust_stats_site_df1$corrected.rand</code></pre>
+<pre><code>## [1] -0.01510113</code></pre>
+<p><strong>There is complete disagreement between the Site classification and the cluster solution as the Rand index is negative = -0.01.</strong></p>
+<p><strong>For df1 based on culture types</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df1 keeping  n = 2 (culture types)
+
+hc.res_df1 &lt;- eclust(df1_scaled, &quot;hclust&quot;, k = 2, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+#df1 based on culture types
+
+table(group_df1_culture, hc.res_df1$cluster)</code></pre>
+<pre><code>##                  
+## group_df1_culture  1  2
+##                 1 90  1
+##                 2 53 38</code></pre>
+<p><strong>Quantifying the agreement between infection_sites and heirarchial clusters using either the corrected Rand index</strong>:</p>
+<pre class="r"><code>library(&quot;fpc&quot;)
+# Compute cluster stats
+culture_df1 &lt;- as.numeric(group_df1_culture)
+clust_stats_culture_df1 &lt;- cluster.stats(d = get_dist(df1_scaled, method = &quot;pearson&quot;), culture_df1, hc.res_df1$cluster)
+
+# Corrected Rand index
+clust_stats_culture_df1$corrected.rand</code></pre>
+<pre><code>## [1] 0.1622009</code></pre>
+<p>There is moderately strong agreement between the culture type classification and the herirarchial clusters. Rand index = 0.24 which is higher compared to the above classifications to say that these isolates cluster better according to the culture types of the isolates. <strong>We see that isolates belonging to Monoculture clade cluster together (cluster 1)</strong>. This was aslo seen in the PCA plot in the previous section:</p>
+<div class="figure">
+<img src="2D%20PCA%20plots_df1.png" alt="2D PCA plot of df1 by the culture type difference" />
+<p class="caption"><strong>2D PCA plot of df1 by the culture type difference</strong></p>
+</div>
+</div>
+<div id="cross-tabulation-for-df2" class="section level4">
+<h4>Cross tabulation for df2:</h4>
+<p><strong>For df2 based on SNP clades</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df2 keeping  n = 18 (no of SNP clades)
+
+hc.res_df2 &lt;- eclust(df2_scaled, &quot;hclust&quot;, k = 18, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+#df1 based on SNP clades
+
+table(group_df2_SNP, hc.res_df2$cluster)</code></pre>
+<pre><code>##              
+## group_df2_SNP 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18
+##           3   1 0 0 0 0 0 1 0 0  2  0  0  1  0  0  0  0  0
+##           1   1 1 1 2 1 1 0 0 1  2  1  1  0  0  1  1  0  0
+##           4   1 1 2 1 1 1 1 1 1  1  0  1  0  0  1  0  1  0
+##           9   0 0 0 1 1 0 0 0 0  0  0  0  1  1  1  0  0  1
+##           2   0 1 1 1 1 0 0 0 1  0  1  0  0  2  0  0  0  0
+##           8   0 0 1 0 0 0 1 1 0  0  0  0  0  0  0  0  0  0
+##           18  0 0 0 0 0 0 0 1 1  0  0  0  0  0  0  0  0  0
+##           11  1 1 0 0 2 0 0 0 0  0  1  0  1  1  0  0  0  1
+##           12  0 1 0 1 0 0 0 0 0  0  0  0  1  1  0  0  0  0
+##           200 0 0 1 0 0 0 0 0 1  1  0  0  0  0  0  0  0  0
+##           16  0 0 0 0 0 0 0 0 0  1  0  1  0  0  1  0  0  0
+##           10  0 0 0 0 0 1 2 0 0  1  0  0  0  0  0  0  0  0
+##           300 1 0 0 0 1 0 0 0 1  1  0  0  1  0  0  0  0  0
+##           203 1 0 0 1 0 0 0 0 0  0  0  0  0  0  0  0  0  0
+##           201 0 0 0 0 0 0 1 0 0  0  0  0  0  0  0  1  0  0
+##           204 0 1 0 0 0 0 0 0 0  0  0  0  0  0  0  1  0  0
+##           202 0 0 0 0 0 0 1 0 0  0  0  0  0  0  0  0  1  0
+##           13  1 0 0 0 1 0 0 0 0  0  1  0  0  0  0  0  1  1</code></pre>
+<p><strong>Quantifying the agreement between SNP clades and heirarchial clusters using either the corrected Rand index</strong>:</p>
+<pre class="r"><code>library(&quot;fpc&quot;)
+# Compute cluster stats
+SNPs_df2 &lt;- as.numeric(group_df2_SNP)
+clust_stats_SNPs_df2 &lt;- cluster.stats(d = get_dist(df2_scaled, method = &quot;pearson&quot;), SNPs_df2, hc.res_df2$cluster)
+# Corrected Rand index
+clust_stats_SNPs_df2$corrected.rand</code></pre>
+<pre><code>## [1] -0.0376837</code></pre>
+<p><strong>There is complete disagreement between the SNP clade classification and the cluster solution as the Rand index is negative = -0.03.</strong></p>
+<p><strong>For df2 based on MLST clades</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df2 keeping  n = 15 (no of MLST clades)
+
+hc.res_df2 &lt;- eclust(df2_scaled, &quot;hclust&quot;, k = 15, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+#df2 based on MLST clades
+
+table(group_df2_MLST, hc.res_df2$cluster)</code></pre>
+<pre><code>##               
+## group_df2_MLST 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+##            3   1 0 1 0 0 0 0 1 2  0  1  0  0  0  0
+##            1   1 2 0 1 2 1 0 1 2  1  0  1  1  1  0
+##            300 2 2 1 1 0 2 0 1 2  0  1  0  0  2  0
+##            4   1 2 1 1 2 1 1 1 1  0  0  0  1  0  1
+##            9   0 1 0 1 0 0 0 0 0  0  0  1  0  0  0
+##            2   0 2 1 1 0 0 0 0 0  1  0  2  0  0  0
+##            8   0 0 1 0 0 1 1 0 0  0  0  0  0  0  0
+##            18  0 0 0 0 0 0 1 1 0  0  0  0  0  0  0
+##            11  1 3 0 0 0 0 0 0 0  1  1  0  0  0  0
+##            12  0 0 0 1 0 0 0 0 0  0  1  1  0  0  0
+##            16  0 0 0 0 1 0 0 0 0  0  0  0  1  0  0
+##            10  0 0 0 0 1 1 0 0 1  0  0  0  0  0  0
+##            0   0 1 1 1 0 3 0 1 1  0  0  0  1  0  2
+##            7   0 0 0 0 0 0 0 0 0  0  1  0  0  0  0
+##            13  0 1 0 0 0 0 0 0 0  0  0  0  0  0  0
+##            400 1 0 0 0 0 1 0 0 0  1  0  0  0  0  0</code></pre>
+<p><strong>Quantifying the agreement between MLST clades and heirarchial clusters using either the corrected Rand index</strong>:</p>
+<pre class="r"><code>library(&quot;fpc&quot;)
+# Compute cluster stats
+MLST_df2 &lt;- as.numeric(group_df2_MLST)
+clust_stats_MLST_df2 &lt;- cluster.stats(d = get_dist(df2_scaled, method = &quot;pearson&quot;), MLST_df2, hc.res_df2$cluster)
+
+# Corrected Rand index
+clust_stats_MLST_df2$corrected.rand</code></pre>
+<pre><code>## [1] -0.0237179</code></pre>
+<p><strong>There is complete disagreement between the SNP clade classification and the cluster solution as the Rand index is negative = -0.02.</strong></p>
+<p><strong>For df2 based on sites of infection</strong>:</p>
+<pre class="r"><code># Hierarchical clustering for df2 keeping  n = 6 (no of sites)
+
+hc.res_df2 &lt;- eclust(df2_scaled, &quot;hclust&quot;, k = 6, hc_metric = &quot;pearson&quot;, 
+                 hc_method = &quot;ward.D2&quot;, graph = FALSE)
+
+#df2 based on site of infection
+
+table(group_df2_site, hc.res_df2$cluster)</code></pre>
+<pre><code>##               
+## group_df2_site  1  2  3  4  5  6
+##              1  5  4  2  2  1  2
+##              2 12  9  4  6  5  0
+##              0  0  1  0  0  0  0
+##              3  8  6  4  3  2  0
+##              4  0  1  0  0  0  1
+##              6  2  0  1  0  1  0
+##              5  4  2  0  0  3  1</code></pre>
+<p><strong>Quantifying the agreement between infection_sites and heirarchial clusters using either the corrected Rand index</strong>:</p>
+<pre class="r"><code>library(&quot;fpc&quot;)
+# Compute cluster stats
+site_df2 &lt;- as.numeric(group_df2_site)
+clust_stats_site_df2 &lt;- cluster.stats(d = get_dist(df2_scaled, method = &quot;pearson&quot;), site_df2, hc.res_df2$cluster)
+
+# Corrected Rand index
+clust_stats_site_df2$corrected.rand</code></pre>
+<pre><code>## [1] -0.01442376</code></pre>
+<p><strong>There is complete disagreement between the Site classification and the cluster solution as the Rand index is negative = -0.01.</strong></p>
+<p><strong>Based on the above statistics, it would be fair to say that some of the meaningful clustering was possible only in df1 dataset</strong></p>
+</div>
+</div>
+</div>
+<div id="summary" class="section level2">
+<h2>7) Summary</h2>
+<p>We validated clustering results using the silhouette method and the Dunn index. This task is facilitated using the combination of two R functions: <strong>eclust()</strong> and <strong>fviz_silhouette</strong> in the <strong>factoextra package</strong>. We also demonstrated how to assess the agreement between a clustering result and an external reference.</p>
+<p>In the next section, we’ll try to adderess the ways to</p>
+<ul>
+<li><p><strong>i) choose the appropriate clustering algorithm for the data</strong></p></li>
+<li><p><strong>ii) computing p-values for hierarchical clustering</strong>.</p></li>
+</ul>
+</div>
+
+<p><b>Copyright &copy; 2020 Abhilash Kannan.</b></p>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

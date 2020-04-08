@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Abhilash Kannan" />
+
+
+<title>Choice of Best Clustering algorithms</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Clustering analyis for Candida albicans</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Clust_tend.html">Clustering tendency</a>
+    </li>
+    <li>
+      <a href="optimal_clust_identification.html">Optimal number of clusters</a>
+    </li>
+    <li>
+      <a href="valid_stats.html">Validation Statistics</a>
+    </li>
+    <li>
+      <a href="Clustering_p_value.html">P-value for Heirarchial Clustering</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:abhilifesicizurich@gmail.com">
+    <span class="fa fa-question fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Choice of Best Clustering algorithms</h1>
+<h4 class="author">Abhilash Kannan</h4>
+<h4 class="date">3/4/2020</h4>
+
+</div>
+
+
+<style type="text/css">
+
+body{ /* Normal  */
+  
+      
+  }
+td {  /* Table  */
+  
+}
+h1.title {
+  
+  color: DarkRed;
+}
+h1 { /* Header 1 */
+  
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+h4 { /* Header 4 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+h5 { /* Header 4 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+
+code.r{ /* Code block */
+    
+}
+pre { /* Code block - determines code spacing between lines */
+    
+}
+</style>
+<p><strong>Choosing the best clustering method</strong> for a given data can be a hard task. This section describes the package <strong>clValid</strong> <em>(Brock et al. 2008)</em>, which can be used to compare simultaneously multiple clustering algorithms in a single function call for identifying the best clustering approach and the optimal number of clusters.</p>
+<p>We’ll start by describing the different measures in the <strong>clValid package</strong> for comparing clustering algorithms. Next, we’ll present the function <strong>clValid()</strong>. Finally, we’ll provide scripts for validating clustering results and comparing clustering algorithms.</p>
+<div id="measure-for-comparing-clustering-algorithms" class="section level2">
+<h2>1) Measure for comparing clustering algorithms</h2>
+<p>The <strong>clValid package</strong> compares clustering algorithms using two cluster validation measures:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong><em>Internal measures</em></strong>, which uses intrinsic information in the data to assess the quality of the clustering. Internal measures include the connectivity, the silhouette coefficient and the Dunn index as described in the section cluster validation statistics.</p></li>
+<li><p><strong><em>Stability measures</em></strong>, a special version of internal measures, which evaluates the consistency of a clustering result by comparing it with the clusters obtained after each column is removed, one at a time.</p></li>
+</ol>
+<p>Cluster stability measures include:</p>
+<ul>
+<li>The average proportion of non-overlap <strong>(APN)</strong></li>
+<li>The average distance <strong>(AD)</strong></li>
+<li>The average distance between means <strong>(ADM)</strong></li>
+<li>The figure of merit <strong>(FOM)</strong></li>
+</ul>
+<p>The <strong>APN</strong>, <strong>AD</strong>, and <strong>ADM</strong> are all based on the cross-classification table of the original clustering on the full data with the clustering based on the removal of one column.</p>
+<p>The <strong>APN</strong> measures the average proportion of observations not placed in the same cluster by clustering based on the full data and clustering based on the data with a single column removed.</p>
+<p>The <strong>AD</strong> measures the average distance between observations placed in the same cluster under both cases (full data set and removal of one column).</p>
+<p>The <strong>ADM</strong> measures the average distance between cluster centers for observations placed in the same cluster under both cases.</p>
+<p>The <strong>FOM</strong> measures the average intra-cluster variance of the deleted column, where the clustering is based on the remaining (undeleted) columns.</p>
+<p><strong>The values of APN, ADM and FOM ranges from 0 to 1, with smaller value corresponding with highly consistent clustering results. AD has a value between 0 and infinity, and smaller values are also preferred.</strong></p>
+<p><em>Note that, the clValid package provides also biological validation measures, which evaluates the ability of a clustering algorithm to produce biologically meaningful clusters. An application is microarray or RNAseq data where observations corresponds to genes.</em></p>
+<div id="data-preparation" class="section level3">
+<h3>2) Data preparation</h3>
+<p>We’ll use two data sets:</p>
+<ul>
+<li><p><strong>Gene expression data - df1</strong> (log2FC of isolates vs SC5314 - 182 samples X 6217 genes from Monocultre and Coculture).</p></li>
+<li><p><strong>Gene expression data - df2</strong> (log2FC of isolates in Monoculture vs Coculture).</p></li>
+</ul>
+<pre class="r"><code>set.seed(123)
+
+#df1
+logFC_isolatesvsSC5314 &lt;- read.delim(&quot;/Users/Abhi/Desktop/Abhilash/study/Post-Doc/Lab_notebook/eQTL/Gene_expression_analysis/IsolatesvsSC5314/isolatesvsSC5314_LogFC_transpose.txt&quot;,
+                          row.names=&quot;isolate&quot;,stringsAsFactors = FALSE)
+
+#df2
+logFC_Monovscoculture &lt;- read.delim(&quot;/Users/Abhi/Desktop/Abhilash/study/Post-Doc/Lab_notebook/eQTL/Gene_expression_analysis/Isolates_conditions/Mono_coculture_isolates_LogFC_transpose.txt&quot;,
+                          row.names=&quot;isolate_comp&quot;,stringsAsFactors = FALSE)</code></pre>
+<p>The data sets look like this:</p>
+<pre class="r"><code>#df1
+head(logFC_isolatesvsSC5314, 3)
+
+#df2
+head(logFC_Monovscoculture, 3)</code></pre>
+<p>Check if there is any missing values, if found try to remove it.</p>
+<pre class="r"><code>#df1
+df1 &lt;- logFC_isolatesvsSC5314[,c(9:6225)]
+df1 &lt;- na.omit(df1)
+#df2
+df2 &lt;- logFC_Monovscoculture[,c(7:6223)]
+df2 &lt;- na.omit(df2)</code></pre>
+<p>we also don’t want the clustering algorithm to depend to an arbitrary variable unit, we start by scaling/standardizing the data using the R function scale():</p>
+<pre class="r"><code>#df1
+df1_scaled &lt;- scale(df1)
+
+#df2
+df2_scaled &lt;- scale(df2)</code></pre>
+<p><strong>Defining Groups df1 and df2 dataset</strong>:</p>
+<p>This is required for the cluster validation</p>
+<pre class="r"><code># df1
+
+#Groups for df1 based on SNP clades
+group_df1_SNP &lt;- factor(logFC_isolatesvsSC5314$CLADE_SNP_numeric, levels = unique(logFC_isolatesvsSC5314$CLADE_SNP_numeric))
+group_df1_SNP
+
+#Groups for df1 based on MLST clades
+group_df1_MLST &lt;- factor(logFC_isolatesvsSC5314$CLADE_MLST_numeric, levels = unique(logFC_isolatesvsSC5314$CLADE_MLST_numeric))
+group_df1_MLST
+
+#Groups for df1 based on site of infection
+group_df1_site &lt;- factor(logFC_isolatesvsSC5314$Site_numeric, levels = unique(logFC_isolatesvsSC5314$Site_numeric))
+group_df1_site
+
+#Groups for df1 based on culture type
+group_df1_culture &lt;- factor(logFC_isolatesvsSC5314$culture_type_numeric, levels = unique(logFC_isolatesvsSC5314$culture_type_numeric))
+group_df1_culture
+
+#df2
+
+#Groups for df2 based on SNP clades
+group_df2_SNP &lt;- factor(logFC_Monovscoculture$CLADE_SNP_numeric, levels = unique(logFC_Monovscoculture$CLADE_SNP_numeric))
+group_df2_SNP
+
+#Groups for df2 based on MLST clades
+group_df2_MLST &lt;- factor(logFC_Monovscoculture$CLADE_MLST_numeric, levels = unique(logFC_Monovscoculture$CLADE_MLST_numeric))
+group_df2_MLST
+
+#Groups for df2 based on site of infection
+group_df2_site &lt;- factor(logFC_Monovscoculture$Site_Numeric, levels = unique(logFC_Monovscoculture$Site_Numeric))
+group_df2_site</code></pre>
+</div>
+</div>
+<div id="compare-clustering-algorithms-in-r" class="section level2">
+<h2>3) Compare clustering algorithms in R</h2>
+<p>We’ll use the function <strong>clValid()</strong> [in the clValid package], which simplified format is as follows:</p>
+<p><strong>clValid(obj, nClust, clMethods = “hierarchical”, validation = “stability”, maxitems = 600,metric = “euclidean”, method = “average”)</strong></p>
+<p><strong>obj</strong>: A numeric matrix or data frame. Rows are the items to be clustered and columns are samples.</p>
+<p><strong>nClust</strong>: A numeric vector specifying the numbers of clusters to be evaluated. e.g., 2:10</p>
+<p><strong>clMethods</strong>: The clustering method to be used. Available options are “hierarchical”, “kmeans”, “diana”, “fanny”, “som”, “model”, “sota”, “pam”, “clara”, and “agnes”, with multiple choices allowed.</p>
+<p><strong>validation</strong>: The type of validation measures to be used. Allowed values are “internal”, “stability”, and “biological”, with multiple choices allowed.</p>
+<p><strong>maxitems</strong>: The maximum number of items (rows in matrix) which can be clustered.</p>
+<p><strong>metric</strong>: The metric used to determine the distance matrix. Possible choices are “euclidean”, “correlation”, and “manhattan”.</p>
+<p><strong>method</strong>: For hierarchical clustering (hclust and agnes), the agglomeration method to be used. Available choices are “ward”, “single”, “complete” and “average”.</p>
+<p>For example, for df1 data set, the clValid() function can be used as follows.</p>
+<p>We start by cluster internal measures, which include the connectivity, silhouette width and Dunn index. It’s possible to compute simultaneously these internal measures for multiple clustering algorithms in combination with a range of cluster numbers.</p>
+<p><strong>For df1 dataset</strong>:</p>
+<pre class="r"><code>#Install the packages
+#install.packages(&quot;clValid&quot;)
+
+# Load the packages
+library(clValid)
+# df1 data set:
+# Compute clValid
+clmethods &lt;- c(&quot;hierarchical&quot;,&quot;kmeans&quot;,&quot;pam&quot;)
+intern_df1 &lt;- clValid(df1_scaled, nClust = 2:18, 
+              clMethods = clmethods, validation = &quot;internal&quot;)
+# Summary
+summary(intern_df1)</code></pre>
+<pre><code>## 
+## Clustering Methods:
+##  hierarchical kmeans pam 
+## 
+## Cluster sizes:
+##  2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
+## 
+## Validation Measures:
+##                                   2        3        4        5        6        7        8        9       10       11       12       13       14       15       16       17       18
+##                                                                                                                                                                                    
+## hierarchical Connectivity    2.9290   7.4536  11.3115  35.6440  39.0226  41.4754  44.4044  49.3802  52.3302  69.6762  73.5341  80.1817  85.6214  88.6198  89.6198  96.1873 100.0230
+##              Dunn            0.4623   0.4559   0.4559   0.3936   0.4570   0.4570   0.4602   0.4602   0.4602   0.4555   0.4555   0.4475   0.4815   0.4815   0.4815   0.4815   0.4815
+##              Silhouette      0.2514   0.2133   0.1402   0.1560   0.1632   0.1480   0.1399   0.1348   0.1254   0.1217   0.1170   0.1157   0.1131   0.1066   0.1040   0.0977   0.0937
+## kmeans       Connectivity   29.8210  35.9175  39.2960  43.1540  60.9635  74.1683 113.2508 122.5877 139.4190 144.6048 143.0325 137.9361 172.9381 174.8214 179.1115 179.0786 180.0286
+##              Dunn            0.3058   0.3636   0.4132   0.4257   0.2585   0.2585   0.3373   0.3240   0.3215   0.3215   0.3584   0.3634   0.3612   0.3728   0.3414   0.3893   0.4131
+##              Silhouette      0.1965   0.1831   0.1754   0.1766   0.1541   0.1451   0.1159   0.1047   0.1044   0.1025   0.1091   0.1082   0.0999   0.1001   0.0974   0.1005   0.1013
+## pam          Connectivity   42.4389  73.3135 131.8774 121.7933 151.0056 170.0262 166.2429 180.6631 194.5921 204.8353 226.9492 241.0770 222.3960 239.6397 238.8619 243.7746 255.4611
+##              Dunn            0.2553   0.2553   0.2292   0.2292   0.2292   0.2292   0.3311   0.3311   0.3316   0.3317   0.3373   0.3373   0.3373   0.3373   0.3373   0.3373   0.3408
+##              Silhouette      0.1123   0.1282   0.0838   0.0924   0.0854   0.0770   0.0831   0.0743   0.0671   0.0639   0.0576   0.0538   0.0650   0.0574   0.0629   0.0595   0.0541
+## 
+## Optimal Scores:
+## 
+##              Score  Method       Clusters
+## Connectivity 2.9290 hierarchical 2       
+## Dunn         0.4815 hierarchical 14      
+## Silhouette   0.2514 hierarchical 2</code></pre>
+<p>It can be seen that hierarchical clustering with two clusters performs the best in most cases (i.e., for connectivity and Silhouette measures). Regardless of the clustering algorithm, the optimal number of clusters seems to be two using the three measures.</p>
+<p>The stability measures for df1 datasets can be computed as follow (optional):</p>
+<pre class="r"><code># # Stability measures
+# set.seed(123)
+# clmethods &lt;- c(&quot;hierarchical&quot;,&quot;kmeans&quot;,&quot;pam&quot;)
+# stab_df1 &lt;- clValid(df1_scaled, nClust = 2:18, clMethods = clmethods, 
+#                 validation = &quot;stability&quot;,verbose=TRUE)
+# 
+# # Display only optimal Scores
+# optimalScores(stab_df1)</code></pre>
+<p><strong>For df2 dataset</strong>:</p>
+<pre class="r"><code>#Install the packages
+#install.packages(&quot;clValid&quot;)
+
+# Load the packages
+library(clValid)
+# df1 data set:
+# Compute clValid
+clmethods &lt;- c(&quot;hierarchical&quot;,&quot;kmeans&quot;,&quot;pam&quot;)
+intern_df2 &lt;- clValid(df2_scaled, nClust = 2:18, 
+              clMethods = clmethods, validation = &quot;internal&quot;)
+# Summary
+summary(intern_df2)</code></pre>
+<pre><code>## 
+## Clustering Methods:
+##  hierarchical kmeans pam 
+## 
+## Cluster sizes:
+##  2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 
+## 
+## Validation Measures:
+##                                   2        3        4        5        6        7        8        9       10       11       12       13       14       15       16       17       18
+##                                                                                                                                                                                    
+## hierarchical Connectivity    5.8579  11.8948  17.6278  17.6278  32.5413  33.4913  39.4155  42.5778  44.0778  45.5778  49.8758  50.1258  59.7306  64.1202  65.3702  68.2992  73.4667
+##              Dunn            0.4307   0.3797   0.3797   0.3797   0.3625   0.3625   0.3625   0.3625   0.3625   0.3625   0.3625   0.3625   0.4272   0.4320   0.4320   0.4320   0.4622
+##              Silhouette      0.2503   0.1480   0.1167   0.1114   0.1136   0.1093   0.1024   0.0878   0.0645   0.0418   0.0868   0.0769   0.1162   0.1207   0.1194   0.1094   0.0978
+## kmeans       Connectivity   31.9976  34.9742  40.4266  46.0861  51.9857  42.7440  60.1115  67.2631  73.1810  82.0389  84.5968  85.6437  82.9480  86.1865  87.4365  88.9365  99.8540
+##              Dunn            0.2747   0.3481   0.3481   0.3763   0.3763   0.3763   0.3777   0.3777   0.4125   0.4099   0.4191   0.4731   0.5283   0.5283   0.5283   0.5283   0.5283
+##              Silhouette      0.1624   0.1346   0.1422   0.1407   0.1334   0.1549   0.1289   0.1211   0.1065   0.1142   0.1064   0.1174   0.1176   0.1111   0.1088   0.1072   0.0978
+## pam          Connectivity   28.7508  45.0373  49.3337  46.5683  54.8008  72.7556  72.6718  81.6940  82.9687  84.4770  86.4631  90.6004 102.2151 103.4651 105.2151 107.2329 108.2329
+##              Dunn            0.3074   0.2747   0.3302   0.3302   0.3302   0.3764   0.3811   0.3811   0.3764   0.3764   0.3764   0.3764   0.3764   0.4594   0.4783   0.4783   0.4783
+##              Silhouette      0.1580   0.1280   0.1349   0.1088   0.1087   0.0971   0.1103   0.0966   0.0984   0.0990   0.0981   0.0948   0.0863   0.0867   0.0848   0.0814   0.0826
+## 
+## Optimal Scores:
+## 
+##              Score  Method       Clusters
+## Connectivity 5.8579 hierarchical 2       
+## Dunn         0.5283 kmeans       14      
+## Silhouette   0.2503 hierarchical 2</code></pre>
+<p>It can again be seen that hierarchical clustering with two clusters performs the best in most cases (i.e., for connectivity and Silhouette measures). Regardless of the clustering algorithm, the optimal number of clusters seems to be two using the three measures for df2 dataset.</p>
+<p>The stability measures for df2 datasets can be computed as follow (optional):</p>
+<pre class="r"><code># # Stability measures
+# set.seed(123)
+# clmethods &lt;- c(&quot;hierarchical&quot;)
+# stab_df2 &lt;- clValid(df2_scaled, nClust = 2:5, clMethods = clmethods, 
+#                 validation = &quot;stability&quot;,verbose=TRUE)
+# 
+# # Display only optimal Scores
+# optimalScores(stab_df2)</code></pre>
+</div>
+
+<p><b>Copyright &copy; 2020 Abhilash Kannan.</b></p>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

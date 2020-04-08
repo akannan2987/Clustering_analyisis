@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Abhilash Kannan" />
+
+<meta name="date" content="2020-01-03" />
+
+<title>Identifying optimal number of clusters</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Clustering analyis for Candida albicans</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    More
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="Clust_tend.html">Clustering tendency</a>
+    </li>
+    <li>
+      <a href="optimal_clust_identification.html">Optimal number of clusters</a>
+    </li>
+    <li>
+      <a href="valid_stats.html">Validation Statistics</a>
+    </li>
+    <li>
+      <a href="Clustering_p_value.html">P-value for Heirarchial Clustering</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:abhilifesicizurich@gmail.com">
+    <span class="fa fa-question fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Identifying optimal number of clusters</h1>
+<h4 class="author">Abhilash Kannan</h4>
+<h4 class="date">01/03/2020</h4>
+
+</div>
+
+
+<style type="text/css">
+
+body{ /* Normal  */
+  
+      
+  }
+td {  /* Table  */
+  
+}
+h1.title {
+  
+  color: DarkRed;
+}
+h1 { /* Header 1 */
+  
+  color: DarkBlue;
+}
+h2 { /* Header 2 */
+    
+  color: DarkBlue;
+}
+h3 { /* Header 3 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+h4 { /* Header 4 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+h5 { /* Header 4 */
+  
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+}
+
+
+code.r{ /* Code block */
+    
+}
+pre { /* Code block - determines code spacing between lines */
+    
+}
+</style>
+<p>Determining the optimal number of clusters in a data set is a fundamental issue in partitioning clustering, such as k-means clustering, which requires the user to specify the number of clusters k to be generated.</p>
+<p>Unfortunately, there is no definitive answer to this question. The optimal number of clusters is somehow subjective and depends on the method used for measuring similarities, correlations and the parameters used for partitioning. A simple and popular solution consists of inspecting the dendrogram produced using hierarchical clustering to see if it suggests a particular number of clusters. Unfortunately, this approach is also subjective.</p>
+<p>In this section, we can inspect different methods for determining the optimal number of clusters for k-means, k-medoids (PAM) and hierarchical clustering.</p>
+<p>These methods include direct methods and statistical testing methods:</p>
+<p><strong>1) Direct methods</strong>: consists of optimizing a criterion, such as the within cluster sums of squares or the average silhouette. The corresponding methods are named <em>elbow</em> and <em>silhouette methods</em>, respectively.</p>
+<p><strong>2) Statistical testing methods</strong>: consists of comparing evidence against null hypothesis. An example is the <em>gap statistic</em>.</p>
+<p>In addition to <em>elbow, silhouette</em> and <em>gap statistic methods</em>, there are more than thirty other indices and methods that have been published for identifying the optimal number of clusters. Below, I provide codes for computing all these 30 indices in order to decide the best number of clusters using the “majority rule”.</p>
+<p>For each of these methods:</p>
+<ul>
+<li>I describe the basic idea and the algorithm</li>
+<li>I provide easy-o-use R codes with many examples for determining the optimal number of clusters and visualizing the output.</li>
+</ul>
+<div id="elbow-method" class="section level3">
+<h3>1.1) Elbow method</h3>
+<p>Recall that, the basic idea behind partitioning methods, such as k-means clustering, is to define clusters such that the total intra-cluster variation [or total within-cluster sum of square (WSS)] is minimized. The total WSS measures the compactness of the clustering and we want it to be as small as possible.</p>
+<p>The Elbow method looks at the total WSS as a function of the number of clusters: One should choose a number of clusters so that adding another cluster doesn’t improve much better the total WSS.</p>
+<p>The optimal number of clusters can be defined as follows:</p>
+<ol style="list-style-type: lower-roman">
+<li><p>Compute clustering algorithm (e.g., k-means clustering) for different values of k. For instance, by varying k from 1 to 10 clusters.</p></li>
+<li><p>For each k, calculate the total within-cluster sum of square (wss).</p></li>
+<li><p>Plot the curve of wss according to the number of clusters k.</p></li>
+<li><p>The location of a bend (knee) in the plot is generally considered as an indicator of the appropriate number of clusters.</p></li>
+</ol>
+<p>Note that, the elbow method is sometimes ambiguous. An alternative is the average silhouette method (Kaufman and Rousseeuw,1990) which can be also used with any clustering approach.</p>
+</div>
+<div id="average-silhouette-method" class="section level3">
+<h3>1.2)Average silhouette method</h3>
+<p>The average silhouette approach we’ll be described comprehensively in the chapter cluster validation statistics. Briefly, it measures the quality of a clustering. That is, it determines how well each object lies within its cluster. A high average silhouette width indicates a good clustering.</p>
+<p>Average silhouette method computes the average silhouette of observations for different values of k. The optimal number of clusters k is the one that maximize the average silhouette over a range of possible values for k (Kaufman and Rousseeuw 1990).</p>
+<p>The algorithm is similar to the elbow method and can be computed as follows:</p>
+<ol style="list-style-type: lower-roman">
+<li><p>Compute clustering algorithm (e.g., k-means clustering) for different values of k. For instance, by varying k from 1 to 10 clusters.</p></li>
+<li><p>For each k, calculate the average silhouette of observations (avg.sil).</p></li>
+<li><p>Plot the curve of avg.sil according to the number of clusters k.</p></li>
+<li><p>The location of the maximum is considered as the appropriate number of clusters.</p></li>
+</ol>
+</div>
+<div id="gap-statistic-method" class="section level3">
+<h3>1.3) Gap statistic method</h3>
+<p>The gap statistic has been published by R. Tibshirani, G. Walther, and T. Hastie (Standford University, 2001). The approach can be applied to any clustering method.</p>
+<p>The gap statistic compares the total within intra-cluster variation for different values of k with their expected values under null reference distribution of the data. The estimate of the optimal clusters will be value that maximize the gap statistic (i.e, that yields the largest gap statistic). This means that the clustering structure is far away from the random uniform distribution of points.</p>
+<p>The algorithm works as follows:</p>
+<ol style="list-style-type: lower-roman">
+<li><p>Cluster the observed data, varying the number of clusters from k = 1, …, kmax, and compute the corresponding total within intra-cluster variation Wk.</p></li>
+<li><p>Generate B reference data sets with a random uniform distribution. Cluster each of these reference data sets with varying number of clusters k = 1, …, kmax, and compute the corresponding total within intra-cluster variation Wkb.</p></li>
+<li><p>Compute the estimated gap statistic as the deviation of the observed Wk value from its expected value Wkb under the null hypothesis:</p></li>
+</ol>
+<p><img src="Gap_stat.png" alt="Gap" /> Compute also the standard deviation of the statistics.</p>
+<ol start="4" style="list-style-type: lower-roman">
+<li>Choose the number of clusters as the smallest value of k such that the gap statistic is within one standard deviation of the gap at k+1: Gap(k)≥Gap(k+1)−sk+1.</li>
+</ol>
+<p>Note that, using B = 500 gives quite precise results so that the gap plot is basically unchanged after an another run.</p>
+</div>
+<div id="computing-the-number-of-clusters" class="section level2">
+<h2>2) Computing the number of clusters</h2>
+<p>In this section, we’ll describe two functions for determining the optimal number of clusters:</p>
+<p><strong>i) fviz_nbclust() function</strong> [in factoextra R package]: It can be used to compute the three different methods [elbow, silhouette and gap statistic] for any partitioning clustering methods [K-means, K-medoids (PAM), CLARA, HCUT]. Note that the hcut() function is available only in factoextra package.It computes hierarchical clustering and cut the tree in k pre-specified clusters.</p>
+<p>** ii) NbClust() function** [ in NbClust R package] (Charrad et al. 2014): It provides 30 indices for determining the relevant number of clusters and proposes to users the best clustering scheme from the different results obtained by varying all combinations of number of clusters, distance measures, and clustering methods. It can simultaneously computes all the indices and determine the number of clusters in a single function call.</p>
+<div id="required-packages" class="section level3">
+<h3>2.1) Required packages</h3>
+<p>We’ll use the following packages:</p>
+<p><strong><em>factoextra</em></strong> to determine the optimal number clusters for a given clustering methods and for data visualization.</p>
+<p><strong><em>NbClust</em></strong> for computing about 30 methods at once, in order to find the optimal number of clusters.</p>
+<p>To install and load the packages, type this:</p>
+<pre class="r"><code># install the packages
+#pkgs &lt;- c(&quot;factoextra&quot;,  &quot;NbClust&quot;)
+#install.packages(pkgs)
+
+#load the packages
+library(factoextra)
+library(NbClust)</code></pre>
+</div>
+<div id="data-preparation" class="section level3">
+<h3>2.2) Data preparation</h3>
+<p>We’ll use two data sets:</p>
+<ul>
+<li><p><strong>Gene expression data - df1</strong> (log2FC of isolates vs SC5314 - 182 samples X 6217 genes from Monocultre and Coculture).</p></li>
+<li><p><strong>Gene expression data - df2</strong> (log2FC of isolates in Monoculture vs Coculture).</p></li>
+</ul>
+<pre class="r"><code>set.seed(123)
+
+#df1
+logFC_isolatesvsSC5314 &lt;- read.delim(&quot;/Users/Abhi/Desktop/Abhilash/study/Post-Doc/Lab_notebook/eQTL/Gene_expression_analysis/IsolatesvsSC5314/isolatesvsSC5314_LogFC_transpose.txt&quot;,
+                          row.names=&quot;isolate&quot;,stringsAsFactors = FALSE)
+
+#df2
+logFC_Monovscoculture &lt;- read.delim(&quot;/Users/Abhi/Desktop/Abhilash/study/Post-Doc/Lab_notebook/eQTL/Gene_expression_analysis/Isolates_conditions/Mono_coculture_isolates_LogFC_transpose.txt&quot;,
+                          row.names=&quot;isolate_comp&quot;,stringsAsFactors = FALSE)</code></pre>
+<p>The data sets look like this:</p>
+<pre class="r"><code>#df1
+head(logFC_isolatesvsSC5314, 3)
+
+#df2
+head(logFC_Monovscoculture, 3)</code></pre>
+<p>Check if there is any missing values, if found try to remove it.</p>
+<pre class="r"><code>#df1
+df1 &lt;- logFC_isolatesvsSC5314[,c(9:6225)]
+df1 &lt;- na.omit(df1)
+#df2
+df2 &lt;- logFC_Monovscoculture[,c(7:6223)]
+df2 &lt;- na.omit(df2)</code></pre>
+<p>we also don’t want the clustering algorithm to depend to an arbitrary variable unit, we start by scaling/standardizing the data using the R function scale():</p>
+<pre class="r"><code>#df1
+df1_scaled &lt;- scale(df1)
+
+#df2
+df2_scaled &lt;- scale(df2)</code></pre>
+<p><strong>Defining Groups df1 and df2 dataset</strong>:</p>
+<p>This is required for the cluster validation</p>
+<pre class="r"><code># df1
+
+#Groups for df1 based on SNP clades
+group_df1_SNP &lt;- factor(logFC_isolatesvsSC5314$CLADE_SNP_numeric, levels = unique(logFC_isolatesvsSC5314$CLADE_SNP_numeric))
+group_df1_SNP
+
+#Groups for df1 based on MLST clades
+group_df1_MLST &lt;- factor(logFC_isolatesvsSC5314$CLADE_MLST_numeric, levels = unique(logFC_isolatesvsSC5314$CLADE_MLST_numeric))
+group_df1_MLST
+
+#Groups for df1 based on site of infection
+group_df1_site &lt;- factor(logFC_isolatesvsSC5314$Site_numeric, levels = unique(logFC_isolatesvsSC5314$Site_numeric))
+group_df1_site
+
+#Groups for df1 based on culture type
+group_df1_culture &lt;- factor(logFC_isolatesvsSC5314$culture_type_numeric, levels = unique(logFC_isolatesvsSC5314$culture_type_numeric))
+group_df1_culture
+
+#df2
+
+#Groups for df2 based on SNP clades
+group_df2_SNP &lt;- factor(logFC_Monovscoculture$CLADE_SNP_numeric, levels = unique(logFC_Monovscoculture$CLADE_SNP_numeric))
+group_df2_SNP
+
+#Groups for df2 based on MLST clades
+group_df2_MLST &lt;- factor(logFC_Monovscoculture$CLADE_MLST_numeric, levels = unique(logFC_Monovscoculture$CLADE_MLST_numeric))
+group_df2_MLST
+
+#Groups for df2 based on site of infection
+group_df2_site &lt;- factor(logFC_Monovscoculture$Site_Numeric, levels = unique(logFC_Monovscoculture$Site_Numeric))
+group_df2_site</code></pre>
+<p>Before using any of the statistical methods to compute the clusters we can calculate correlation based distances for both the data sets</p>
+<p><strong>Correlation-based distances are commonly used in gene expression data analysis.</strong> Correlation method can be either <em>pearson, spearman</em> or <em>kendall</em>.</p>
+<p><strong>Computing correlation based distances for df1 dataset</strong></p>
+<pre class="r"><code># Compute
+library(&quot;factoextra&quot;)
+dist.cor_df1 &lt;- get_dist(df1_scaled, method = &quot;pearson&quot;)
+
+# Display a subset
+round(as.matrix(dist.cor_df1)[1:3, 1:3], 1)</code></pre>
+<pre><code>##            FP_CEC1289 FP_CEC1424 FP_CEC1427
+## FP_CEC1289        0.0        0.8        1.1
+## FP_CEC1424        0.8        0.0        1.1
+## FP_CEC1427        1.1        1.1        0.0</code></pre>
+<p><strong>Computing correlation based distances for df2 dataset</strong></p>
+<pre class="r"><code># Compute
+
+dist.cor_df2 &lt;- get_dist(df2_scaled, method = &quot;pearson&quot;)
+
+# Display a subset
+round(as.matrix(dist.cor_df2)[1:3, 1:3], 1)</code></pre>
+<pre><code>##                        FP_CEC1289vsTR_CEC1289 FP_CEC1424vsTR_CEC1424 FP_CEC1427vsTR_CEC1427
+## FP_CEC1289vsTR_CEC1289                    0.0                      1                    1.5
+## FP_CEC1424vsTR_CEC1424                    1.0                      0                    1.0
+## FP_CEC1427vsTR_CEC1427                    1.5                      1                    0.0</code></pre>
+</div>
+<div id="viz_nbclust-function-elbow-silhouhette-and-gap-statistic-methods" class="section level3">
+<h3>2.3) <strong><em>viz_nbclust()</em></strong> function: Elbow, Silhouhette and Gap statistic methods</h3>
+<p>The simplified format is as follow:</p>
+<p><strong>fviz_nbclust(x, FUNcluster, method = c(“silhouette”, “wss”, “gap_stat”))</strong></p>
+<ul>
+<li><p><strong>x</strong>: numeric matrix or data frame</p></li>
+<li><p><strong>FUNcluster</strong>: a partitioning function. Allowed values include kmeans, pam, clara and hcut (for hierarchical clustering).</p></li>
+<li><p><strong>method</strong>: the method to be used for determining the optimal number of clusters.</p></li>
+</ul>
+<p>The code below determine the optimal number of clusters for k-means clustering:</p>
+<p><strong>for df1</strong>:</p>
+<p>** i) Elbow method **:</p>
+<pre class="r"><code># Elbow method
+fviz_nbclust(df1_scaled, kmeans, method = &quot;wss&quot;,print.summary = TRUE,k.max = 25,nboot = 500,verbose = interactive(),linecolor = &quot;steelblue&quot;, diss = dist.cor_df1, barfill = &quot;steelblue&quot;,barcolor = &quot;steelblue&quot;) +
+  geom_vline(xintercept = c(2,5), linetype = 2)+
+  labs(title = &quot;Optimal number of clusters for df1 dataset&quot;,subtitle = &quot;Elbow method&quot;)</code></pre>
+<p><img src="optimal_clust_identification_files/figure-html/Elbow%20method%20for%20df1%20dataset-1.png" width="672" /></p>
+<p><strong>plot depicting the idetification of optimal number of clusters for df1 dataset using elbow method</strong></p>
+<p><strong>ii) Silhouette method</strong>:</p>
+<pre class="r"><code># Silhouette method
+fviz_nbclust(df1_scaled, kmeans, method = &quot;silhouette&quot;,print.summary = TRUE,k.max = 25,nboot = 500,verbose = interactive(),linecolor = &quot;steelblue&quot;, diss = dist.cor_df1, barfill = &quot;steelblue&quot;,barcolor = &quot;steelblue&quot;) +
+  
+  labs(title = &quot;Optimal number of clusters for df1 dataset&quot;,subtitle = &quot;silhouette method&quot;)</code></pre>
+<p><img src="optimal_clust_identification_files/figure-html/Silhouette%20method%20for%20df1%20dataset-1.png" width="672" /></p>
+<p><strong>plot depicting the idetification of optimal number of clusters for df1 dataset using Silhouette method</strong></p>
+<p><strong>ii) Gap statistic method</strong>:</p>
+<pre class="r"><code># Gap statistic
+# nboot = 50 to keep the function speedy. 
+# recommended value: nboot= 500 for your analysis.
+# Use verbose = FALSE to hide computing progression.
+set.seed(123)
+fviz_nbclust(df1_scaled, kmeans, method = &quot;gap_stat&quot;,nstart = 25, print.summary = TRUE,k.max = 10,nboot = 50,verbose = interactive(),linecolor = &quot;steelblue&quot;, diss = dist.cor_df1, barfill = &quot;steelblue&quot;,barcolor = &quot;steelblue&quot;)+
+  labs(title = &quot;Optimal number of clusters for df1 dataset&quot;,subtitle = &quot;Gap statistic method&quot;)</code></pre>
+<pre><code>## Clustering k = 1,2,..., K.max (= 10): .. done
+## Bootstrapping, b = 1,2,..., B (= 50)  [one &quot;.&quot; per sample]:
+## .................................................. 50</code></pre>
+<p><img src="optimal_clust_identification_files/figure-html/Gap%20statistic%20method%20for%20df1%20dataset-1.png" width="672" /></p>
+<p><strong>We do the same for df2 dataset</strong>:</p>
+<p>** i) Elbow method **:</p>
+<pre class="r"><code># Elbow method
+fviz_nbclust(df2_scaled, kmeans, method = &quot;wss&quot;,print.summary = TRUE,k.max = 25,nboot = 500,verbose = interactive(),linecolor = &quot;steelblue&quot;, diss = dist.cor_df2, barfill = &quot;steelblue&quot;,barcolor = &quot;steelblue&quot;) +
+  geom_vline(xintercept = c(2,5), linetype = 2)+
+  labs(title = &quot;Optimal number of clusters for df2 dataset&quot;,subtitle = &quot;Elbow method&quot;)</code></pre>
+<p><img src="optimal_clust_identification_files/figure-html/Elbow%20method%20for%20df2%20dataset-1.png" width="672" /></p>
+<p><strong>plot depicting the idetification of optimal number of clusters for df2 dataset using elbow method</strong></p>
+<p><strong>ii) Silhouette method</strong>:</p>
+<pre class="r"><code># Silhouette method
+fviz_nbclust(df2_scaled, kmeans, method = &quot;silhouette&quot;,print.summary = TRUE,k.max = 25,nboot = 500,verbose = interactive(),linecolor = &quot;steelblue&quot;, diss = dist.cor_df2, barfill = &quot;steelblue&quot;,barcolor = &quot;steelblue&quot;) +
+  
+  labs(title = &quot;Optimal number of clusters for df2 dataset&quot;,subtitle = &quot;silhouette method&quot;)</code></pre>
+<p><img src="optimal_clust_identification_files/figure-html/Silhouette%20method%20for%20df2%20dataset-1.png" width="672" /></p>
+<p><strong>plot depicting the idetification of optimal number of clusters for df2 dataset using Silhouette method</strong></p>
+<p><strong>ii) Gap statistic method</strong>:</p>
+<pre class="r"><code># Gap statistic
+# nboot = 50 to keep the function speedy. 
+# recommended value: nboot= 500 for your analysis.
+# Use verbose = FALSE to hide computing progression.
+set.seed(123)
+fviz_nbclust(df2_scaled, kmeans, method = &quot;gap_stat&quot;,nstart = 25, print.summary = TRUE,k.max = 10,nboot = 50,verbose = interactive(),linecolor = &quot;steelblue&quot;, diss = dist.cor_df2, barfill = &quot;steelblue&quot;,barcolor = &quot;steelblue&quot;)+
+  labs(title = &quot;Optimal number of clusters for df2 dataset&quot;,subtitle = &quot;Gap statistic method&quot;)</code></pre>
+<pre><code>## Clustering k = 1,2,..., K.max (= 10): .. done
+## Bootstrapping, b = 1,2,..., B (= 50)  [one &quot;.&quot; per sample]:
+## .................................................. 50</code></pre>
+<p><img src="optimal_clust_identification_files/figure-html/Gap%20statistic%20method%20for%20df2%20dataset-1.png" width="672" /> <strong>plot depicting the idetification of optimal number of clusters for df2 dataset using Gap statistic method</strong></p>
+<p><strong>for df1</strong>:</p>
+<p><strong>Elbow method</strong>: 2 or 5 clusters solution suggested</p>
+<p><strong>Silhouette method</strong>: 2 clusters solution suggested</p>
+<p><strong>Gap statistic method</strong>: 7 clusters solution suggested</p>
+<p><strong>for df1</strong>:</p>
+<p><strong>Elbow method</strong>: 2 or 5 clusters solution suggested</p>
+<p><strong>Silhouette method</strong>: 3 clusters solution suggested</p>
+<p><strong>Gap statistic method</strong>: 8 clusters solution suggested</p>
+<p>According to these observations, it’s possible to define k = 2 (minimum) and k = 8 (maximum) as the optimal number of clusters in the data.</p>
+<p><strong>Note</strong>: The disadvantage of elbow and average silhouette methods is that, they measure a global clustering characteristic only. A more sophisticated method is to use the gap statistic which provides a statistical procedure to formalize the elbow/silhouette heuristic in order to estimate the optimal number of clusters.</p>
+</div>
+</div>
+<div id="nbclust-function-30-indices-for-choosing-the-best-number-of-clusters-optional" class="section level2">
+<h2>3) NbClust() function: 30 indices for choosing the best number of clusters (optional)</h2>
+<p>** Choosing all iindices did not work for me in this data. Ony using the Silhouette index worked well. Hence I decided to go with it.</p>
+<p>The simplified format of the function NbClust() is:</p>
+<p><strong>NbClust(data = NULL, diss = NULL, distance = “euclidean”, min.nc = 2, max.nc = 15, method = NULL)</strong></p>
+<ul>
+<li><p><strong>data</strong>: matrix</p></li>
+<li><p><strong>diss</strong>: dissimilarity matrix to be used. By default, diss=NULL, but if it is replaced by a dissimilarity matrix, distance should be “NULL”</p></li>
+<li><p><strong>distance</strong>: the distance measure to be used to compute the dissimilarity matrix. Possible values include “euclidean”, “manhattan” or “NULL”.</p></li>
+<li><p><strong>min.nc</strong>, <strong>max.nc</strong>: minimal and maximal number of clusters, respectively method: The cluster analysis method to be used including <em>“ward.D”, “ward.D2”, “single”, “complete”, “average”, “kmeans”</em> and more.</p></li>
+<li><p>To compute NbClust() for kmeans, use method = “kmeans”.</p></li>
+<li><p>To compute NbClust() for hierarchical clustering, method should be one of c(“ward.D”, “ward.D2”, “single”, “complete”, “average”).</p></li>
+</ul>
+<p><strong>NbClust for df1 dataset</strong>:</p>
+<pre class="r"><code>set.seed(123)
+
+NbClust_df1_silhoutte = NbClust(data = df1_scaled, diss =dist.cor_df1, distance = NULL, min.nc = 2, max.nc = 10, 
+
+method = &quot;ward.D2&quot;, index =&quot;silhouette&quot;)
+
+NbClust_df2_silhoutte = NbClust(data = df2_scaled, diss =dist.cor_df2, distance = NULL, min.nc = 2, max.nc = 10, 
+
+method = &quot;ward.D2&quot;, index =&quot;silhouette&quot;)</code></pre>
+<pre class="r"><code>NbClust_df1_silhoutte</code></pre>
+<pre><code>## $All.index
+##      2      3      4      5      6      7      8      9     10 
+## 0.2064 0.1593 0.1586 0.1765 0.1721 0.1800 0.1833 0.1817 0.1738 
+## 
+## $Best.nc
+## Number_clusters     Value_Index 
+##          2.0000          0.2064 
+## 
+## $Best.partition
+##   FP_CEC1289   FP_CEC1424   FP_CEC1427   FP_CEC1492   FP_CEC2018   FP_CEC2021   FP_CEC2022 
+##            1            1            1            1            1            1            1 
+##   FP_CEC2023   FP_CEC2872   FP_CEC2876   FP_CEC3494   FP_CEC3530   FP_CEC3531   FP_CEC3534 
+##            1            1            1            1            1            1            1 
+##   FP_CEC3536   FP_CEC3537   FP_CEC3548   FP_CEC3549   FP_CEC3550   FP_CEC3551   FP_CEC3554 
+##            1            1            1            1            1            1            1 
+##   FP_CEC3557   FP_CEC3558   FP_CEC3561   FP_CEC3600   FP_CEC3602   FP_CEC3607   FP_CEC3610 
+##            1            1            1            1            1            1            1 
+##   FP_CEC3613   FP_CEC3615   FP_CEC3616   FP_CEC3618   FP_CEC3619 FP_CEC3621_1   FP_CEC3634 
+##            1            1            1            1            1            1            1 
+##   FP_CEC3660   FP_CEC3664   FP_CEC3665   FP_CEC3668   FP_CEC3669   FP_CEC3671   FP_CEC3675 
+##            1            1            1            1            1            1            1 
+##   FP_CEC3676   FP_CEC3679   FP_CEC3681   FP_CEC3685   FP_CEC3686   FP_CEC3704   FP_CEC3707 
+##            1            1            1            1            1            1            1 
+##   FP_CEC3708   FP_CEC3711   FP_CEC3712   FP_CEC3715   FP_CEC4024   FP_CEC4035   FP_CEC4038 
+##            1            1            1            1            1            1            1 
+##   FP_CEC4039   FP_CEC4104   FP_CEC4254   FP_CEC4256   FP_CEC4261   FP_CEC4479   FP_CEC4482 
+##            1            1            1            1            1            1            1 
+##   FP_CEC4485   FP_CEC4486   FP_CEC4489   FP_CEC4492   FP_CEC4497   FP_CEC4498   FP_CEC4499 
+##            1            1            1            1            1            1            1 
+##   FP_CEC4500   FP_CEC4502   FP_CEC4510   FP_CEC4512   FP_CEC4525   FP_CEC4660   FP_CEC4692 
+##            1            1            1            1            1            2            1 
+##   FP_CEC4693   FP_CEC4943   FP_CEC4945   FP_CEC5020   FP_CEC5028   FP_CEC5029   FP_CEC5114 
+##            1            1            1            1            1            1            1 
+##   FP_CEC5120   FP_CEC5132   FP_CEC5136    FP_CEC708    FP_CEC712    FP_CEC723        FP_G3 
+##            1            1            1            1            1            1            1 
+##   TR_CEC1289   TR_CEC1424   TR_CEC1427   TR_CEC1492   TR_CEC2018   TR_CEC2021   TR_CEC2022 
+##            1            2            2            2            1            2            2 
+##   TR_CEC2023   TR_CEC2872   TR_CEC2876   TR_CEC3494   TR_CEC3530   TR_CEC3531   TR_CEC3534 
+##            1            1            2            2            1            1            1 
+##   TR_CEC3536   TR_CEC3537   TR_CEC3548   TR_CEC3549   TR_CEC3550   TR_CEC3551   TR_CEC3554 
+##            2            2            2            1            2            1            1 
+##   TR_CEC3557   TR_CEC3558   TR_CEC3561   TR_CEC3600   TR_CEC3602   TR_CEC3607   TR_CEC3610 
+##            2            1            2            1            1            1            2 
+##   TR_CEC3613   TR_CEC3615   TR_CEC3616   TR_CEC3618   TR_CEC3619 TR_CEC3621_1   TR_CEC3634 
+##            2            1            2            1            1            1            2 
+##   TR_CEC3660   TR_CEC3664   TR_CEC3665   TR_CEC3668   TR_CEC3669   TR_CEC3671   TR_CEC3675 
+##            1            2            1            2            1            2            1 
+##   TR_CEC3676   TR_CEC3679   TR_CEC3681   TR_CEC3685   TR_CEC3686   TR_CEC3704   TR_CEC3707 
+##            2            1            1            1            2            2            1 
+##   TR_CEC3708   TR_CEC3711   TR_CEC3712   TR_CEC3715   TR_CEC4024   TR_CEC4035   TR_CEC4038 
+##            1            2            2            1            1            1            2 
+##   TR_CEC4039   TR_CEC4104   TR_CEC4254   TR_CEC4256   TR_CEC4261   TR_CEC4479   TR_CEC4482 
+##            1            1            1            2            2            1            1 
+##   TR_CEC4485   TR_CEC4486   TR_CEC4489   TR_CEC4492   TR_CEC4497   TR_CEC4498   TR_CEC4499 
+##            2            1            1            1            1            1            1 
+##   TR_CEC4500   TR_CEC4502   TR_CEC4510   TR_CEC4512   TR_CEC4525   TR_CEC4660   TR_CEC4692 
+##            2            2            1            2            2            2            1 
+##   TR_CEC4693   TR_CEC4943   TR_CEC4945   TR_CEC5020   TR_CEC5028   TR_CEC5029   TR_CEC5114 
+##            2            1            2            1            1            1            1 
+##   TR_CEC5120   TR_CEC5132   TR_CEC5136    TR_CEC708    TR_CEC712    TR_CEC723        TR_G3 
+##            1            2            1            1            1            2            1</code></pre>
+<pre class="r"><code>NbClust_df2_silhoutte</code></pre>
+<pre><code>## $All.index
+##      2      3      4      5      6      7      8      9     10 
+## 0.2436 0.2489 0.2720 0.2508 0.2390 0.2114 0.2049 0.1750 0.1624 
+## 
+## $Best.nc
+## Number_clusters     Value_Index 
+##           4.000           0.272 
+## 
+## $Best.partition
+##     FP_CEC1289vsTR_CEC1289     FP_CEC1424vsTR_CEC1424     FP_CEC1427vsTR_CEC1427 
+##                          1                          2                          3 
+##     FP_CEC1492vsTR_CEC1492     FP_CEC2018vsTR_CEC2018     FP_CEC2021vsTR_CEC2021 
+##                          2                          1                          2 
+##     FP_CEC2022vsTR_CEC2022     FP_CEC2023vsTR_CEC2023     FP_CEC2872vsTR_CEC2872 
+##                          2                          1                          2 
+##     FP_CEC2876vsTR_CEC2876     FP_CEC3494vsTR_CEC3494     FP_CEC3530vsTR_CEC3530 
+##                          4                          2                          3 
+##     FP_CEC3531vsTR_CEC3531     FP_CEC3534vsTR_CEC3534     FP_CEC3536vsTR_CEC3536 
+##                          1                          1                          2 
+##     FP_CEC3537vsTR_CEC3537     FP_CEC3548vsTR_CEC3548     FP_CEC3549vsTR_CEC3549 
+##                          4                          4                          3 
+##     FP_CEC3550vsTR_CEC3550     FP_CEC3551vsTR_CEC3551     FP_CEC3554vsTR_CEC3554 
+##                          2                          2                          1 
+##     FP_CEC3557vsTR_CEC3557     FP_CEC3558vsTR_CEC3558     FP_CEC3561vsTR_CEC3561 
+##                          4                          1                          2 
+##     FP_CEC3600vsTR_CEC3600     FP_CEC3602vsTR_CEC3602     FP_CEC3607vsTR_CEC3607 
+##                          4                          2                          1 
+##     FP_CEC3610vsTR_CEC3610     FP_CEC3613vsTR_CEC3613     FP_CEC3615vsTR_CEC3615 
+##                          3                          2                          3 
+##     FP_CEC3616vsTR_CEC3616     FP_CEC3618vsTR_CEC3618     FP_CEC3619vsTR_CEC3619 
+##                          2                          1                          1 
+## FP_CEC3621_1vsTR_CEC3621_1     FP_CEC3634vsTR_CEC3634     FP_CEC3660vsTR_CEC3660 
+##                          1                          3                          2 
+##     FP_CEC3664vsTR_CEC3664     FP_CEC3665vsTR_CEC3665     FP_CEC3668vsTR_CEC3668 
+##                          3                          4                          3 
+##     FP_CEC3669vsTR_CEC3669     FP_CEC3671vsTR_CEC3671     FP_CEC3675vsTR_CEC3675 
+##                          3                          4                          4 
+##     FP_CEC3676vsTR_CEC3676     FP_CEC3679vsTR_CEC3679     FP_CEC3681vsTR_CEC3681 
+##                          4                          3                          3 
+##     FP_CEC3685vsTR_CEC3685     FP_CEC3686vsTR_CEC3686     FP_CEC3704vsTR_CEC3704 
+##                          1                          3                          4 
+##     FP_CEC3707vsTR_CEC3707     FP_CEC3708vsTR_CEC3708     FP_CEC3711vsTR_CEC3711 
+##                          1                          1                          3 
+##     FP_CEC3712vsTR_CEC3712     FP_CEC3715vsTR_CEC3715     FP_CEC4024vsTR_CEC4024 
+##                          2                          3                          1 
+##     FP_CEC4035vsTR_CEC4035     FP_CEC4038vsTR_CEC4038     FP_CEC4039vsTR_CEC4039 
+##                          1                          3                          1 
+##     FP_CEC4104vsTR_CEC4104     FP_CEC4254vsTR_CEC4254     FP_CEC4256vsTR_CEC4256 
+##                          2                          1                          2 
+##     FP_CEC4261vsTR_CEC4261     FP_CEC4479vsTR_CEC4479     FP_CEC4482vsTR_CEC4482 
+##                          2                          4                          2 
+##     FP_CEC4485vsTR_CEC4485     FP_CEC4486vsTR_CEC4486     FP_CEC4489vsTR_CEC4489 
+##                          3                          1                          3 
+##     FP_CEC4492vsTR_CEC4492     FP_CEC4497vsTR_CEC4497     FP_CEC4498vsTR_CEC4498 
+##                          1                          3                          1 
+##     FP_CEC4499vsTR_CEC4499     FP_CEC4500vsTR_CEC4500     FP_CEC4502vsTR_CEC4502 
+##                          1                          2                          4 
+##     FP_CEC4510vsTR_CEC4510     FP_CEC4512vsTR_CEC4512     FP_CEC4525vsTR_CEC4525 
+##                          3                          4                          2 
+##     FP_CEC4660vsTR_CEC4660     FP_CEC4692vsTR_CEC4692     FP_CEC4693vsTR_CEC4693 
+##                          1                          1                          4 
+##     FP_CEC4943vsTR_CEC4943     FP_CEC4945vsTR_CEC4945     FP_CEC5020vsTR_CEC5020 
+##                          3                          4                          1 
+##     FP_CEC5028vsTR_CEC5028     FP_CEC5029vsTR_CEC5029     FP_CEC5114vsTR_CEC5114 
+##                          1                          1                          2 
+##     FP_CEC5120vsTR_CEC5120     FP_CEC5132vsTR_CEC5132     FP_CEC5136vsTR_CEC5136 
+##                          1                          3                          3 
+##       FP_CEC708vsTR_CEC708       FP_CEC712vsTR_CEC712       FP_CEC723vsTR_CEC723 
+##                          1                          1                          2 
+##               FP_G3vsTR_G3       FP_SC5314vsTR_SC5314 
+##                          3                          1</code></pre>
+<p>** based on all of the above methods it is most likely that best number of clusters for both the df1 dataset is 2 and df4 dataset is 4</p>
+</div>
+<div id="summary" class="section level2">
+<h2>4) Summary</h2>
+<p>In this section, we covered different methods for choosing the optimal number of clusters in a data set. These methods include the elbow, the silhouette and the gap statistic methods.</p>
+<p>we showed how to compute these methods using the R function <em>fviz_nbclust()</em> [in <em>factoextra R package</em>]. Additionally, we described the package <em>NbClust()</em>, which can be used to compute simultaneously many other indices and methods for determining the number of clusters.</p>
+<p>After choosing the number of clusters k, the next step is to perform partitioning clustering or heirachial chustering.</p>
+</div>
+
+<p><b>Copyright &copy; 2020 Abhilash Kannan.</b></p>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
